@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>東京五日遊 7/18-7/22</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root{
     --bg: #f5f3ee;
@@ -241,6 +243,20 @@
     content: "📍";
     font-size: 0.9rem;
   }
+  .order-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
 
   .empty-hint{
     color: var(--sub);
@@ -323,14 +339,14 @@ const data = {
           { "name": "鳥つね自然洞", "type": "親子丼", "note": "御徒町站南口步行6分" }
         ],
         "shops": [
-          { "name": "Card Shop Clove Base", "map": "https://maps.app.goo.gl/CswCAdi43QKWfgzQ9" },
-          { "name": "SNKRDUNK TCG AKIHABARA", "map": "https://maps.app.goo.gl/JQPveZhiZFoA52Dm6" },
-          { "name": "卡牌王國 秋葉原車站前店", "map": "https://maps.app.goo.gl/ANkgq5SbTceaGVkP8" },
-          { "name": "Hobby station 秋葉原ラジオ会館店", "map": "https://maps.app.goo.gl/5ap1agSfVd9mG4j77" },
-          { "name": "くじ専門店マッハ", "map": "https://maps.app.goo.gl/iuwaAx9RPaqyUtoB9" },
-          { "name": "Hobby station 秋葉原本店", "map": "https://maps.app.goo.gl/ZCVyeKDRc9Y6kP5h9" },
-          { "name": "福福トレカ秋葉原コレクションカード専門店", "map": "https://maps.app.goo.gl/d3jJG2u49wKPTQ2t9" },
-          { "name": "Trading Card Space", "map": "https://maps.app.goo.gl/AqLDHbiobDMWv8zB9" }
+          { "name": "SNKRDUNK TCG AKIHABARA", "map": "https://maps.app.goo.gl/JQPveZhiZFoA52Dm6", "lat": 35.698336, "lng": 139.7715973, "note": "秋葉原站電氣街口出站即到" },
+          { "name": "卡牌王國 秋葉原車站前店", "map": "https://maps.app.goo.gl/ANkgq5SbTceaGVkP8", "lat": 35.6983495, "lng": 139.7718269, "note": "與SNKRDUNK相鄰，步行1分" },
+          { "name": "Hobby station 秋葉原ラジオ会館店", "map": "https://maps.app.goo.gl/5ap1agSfVd9mG4j77", "lat": 35.6979622, "lng": 139.7718933, "note": "秋葉原ラジオ会館內，步行2分" },
+          { "name": "くじ専門店マッハ", "map": "https://maps.app.goo.gl/iuwaAx9RPaqyUtoB9", "lat": 35.6979149, "lng": 139.7719571, "note": "同棟ラジオ会館內，步行1分" },
+          { "name": "Hobby station 秋葉原本店", "map": "https://maps.app.goo.gl/ZCVyeKDRc9Y6kP5h9", "lat": 35.6987709, "lng": 139.7708323, "note": "沿中央通往北走，步行約6分" },
+          { "name": "福福トレカ秋葉原コレクションカード専門店", "map": "https://maps.app.goo.gl/d3jJG2u49wKPTQ2t9", "lat": 35.6993045, "lng": 139.770439, "note": "繼續往北，步行約4分" },
+          { "name": "Trading Card Space", "map": "https://maps.app.goo.gl/AqLDHbiobDMWv8zB9", "lat": 35.6998789, "lng": 139.7704595, "note": "本路線最北端，步行約4分" },
+          { "name": "Card Shop Clove Base", "map": "https://maps.app.goo.gl/CswCAdi43QKWfgzQ9", "lat": 35.6980, "lng": 139.7769, "note": "位於神田佐久間町，需跨到車站東側，建議最後安排，步行約12-15分（座標為街區估計值）" }
         ]
       },
       {
@@ -559,15 +575,60 @@ trip.days.forEach((day, idx) => {
   html += `</div>`;
 
   if (day.shops && day.shops.length) {
-    html += `<div class="section"><h3>🃏 卡牌店清單</h3><ul class="shop-list">`;
-    day.shops.forEach(s => {
-      html += `<li><a href="${s.map}" target="_blank" rel="noopener">${s.name}</a></li>`;
+    const hasCoords = day.shops.some(s => s.lat && s.lng);
+    html += `<div class="section"><h3>🃏 卡牌店清單${hasCoords ? '（依建議走訪順序）' : ''}</h3><ul class="shop-list">`;
+    day.shops.forEach((s, i) => {
+      html += `
+        <li>
+          <a href="${s.map}" target="_blank" rel="noopener" style="align-items:flex-start;">
+            <span><span class="order-badge">${i + 1}</span>${s.name}${s.note ? `<br><span class="r-note" style="margin-left:26px;">${s.note}</span>` : ""}</span>
+          </a>
+        </li>
+      `;
     });
-    html += `</ul></div>`;
+    html += `</ul>`;
+    if (hasCoords) {
+      html += `
+        <div id="shopmap-${idx}" style="height:340px;border-radius:12px;margin-top:12px;"></div>
+        <div class="note-line" style="margin-top:8px;">🗺️ 圓圈數字為建議走訪順序，虛線為參考路徑；地圖資料來源 OpenStreetMap，實際依開店時間彈性調整</div>
+      `;
+    }
+    html += `</div>`;
   }
 
   panel.innerHTML = html;
   mainEl.appendChild(panel);
+});
+
+const dayMaps = {};
+function initShopMap(idx, day){
+  const shops = (day.shops || []).filter(s => s.lat && s.lng);
+  if (!shops.length || dayMaps[idx]) return;
+  const el = document.getElementById(`shopmap-${idx}`);
+  if (!el) return;
+  const map = L.map(el).setView([shops[0].lat, shops[0].lng], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  const latlngs = [];
+  shops.forEach((s, i) => {
+    const icon = L.divIcon({
+      className: 'shop-marker',
+      html: `<div style="background:#d1495b;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${i + 1}</div>`,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+    L.marker([s.lat, s.lng], { icon }).addTo(map)
+      .bindPopup(`<strong>${i + 1}. ${s.name}</strong><br>${s.note || ""}<br><a href="${s.map}" target="_blank" rel="noopener">在Google地圖開啟</a>`);
+    latlngs.push([s.lat, s.lng]);
+  });
+  L.polyline(latlngs, { color: '#2e6f95', weight: 3, dashArray: '6 6' }).addTo(map);
+  map.fitBounds(latlngs, { padding: [30, 30] });
+  dayMaps[idx] = map;
+}
+trip.days.forEach((day, idx) => {
+  if (idx === 0) initShopMap(idx, day);
 });
 
 const subwayIdx = trip.days.length;
@@ -596,6 +657,13 @@ mainEl.appendChild(subwayPanel);
 function selectDay(idx){
   document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", i === idx));
   document.querySelectorAll(".day-panel").forEach((p, i) => p.classList.toggle("active", i === idx));
+  const day = trip.days[idx];
+  if (day && day.shops && day.shops.some(s => s.lat && s.lng)) {
+    setTimeout(() => {
+      if (!dayMaps[idx]) initShopMap(idx, day);
+      else dayMaps[idx].invalidateSize();
+    }, 50);
+  }
 }
 
 function toggleDone(checkbox, key){
