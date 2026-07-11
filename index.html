@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>東京五日遊 7/18-7/22</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <style>
   :root{
     --bg: #f5f3ee;
@@ -437,7 +437,8 @@ const data = {
       }
     ],
     "subwayMap": {
-      "image": "subway.png"
+      "image": "subway.png",
+      "extra": { "image": "skyliner.jpg", "caption": "成田機場→京成Skyliner→上野(KS01)/日暮里(KS02) 路線圖", "note": "機場 → B1鐵道下電扶梯直走 → 京成電鐵（SKYLINER & KEISEI INFO CENTER 或 販賣機）" }
     }
   }
 };
@@ -602,33 +603,48 @@ trip.days.forEach((day, idx) => {
 
 const dayMaps = {};
 function initShopMap(idx, day){
-  const shops = (day.shops || []).filter(s => s.lat && s.lng);
-  if (!shops.length || dayMaps[idx]) return;
-  const el = document.getElementById(`shopmap-${idx}`);
-  if (!el) return;
-  const map = L.map(el).setView([shops[0].lat, shops[0].lng], 16);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-  const latlngs = [];
-  shops.forEach((s, i) => {
-    const icon = L.divIcon({
-      className: 'shop-marker',
-      html: `<div style="background:#d1495b;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${i + 1}</div>`,
-      iconSize: [26, 26],
-      iconAnchor: [13, 13]
+  try {
+    const shops = (day.shops || []).filter(s => s.lat && s.lng);
+    if (!shops.length || dayMaps[idx]) return;
+    const el = document.getElementById(`shopmap-${idx}`);
+    if (!el) return;
+    if (typeof L === "undefined") {
+      el.innerHTML = '<div class="empty-hint">地圖載入中，若一直無法顯示請直接點上方店名開啟 Google 地圖</div>';
+      return;
+    }
+    const map = L.map(el).setView([shops[0].lat, shops[0].lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    const latlngs = [];
+    shops.forEach((s, i) => {
+      const icon = L.divIcon({
+        className: 'shop-marker',
+        html: `<div style="background:#d1495b;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);">${i + 1}</div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
+      });
+      L.marker([s.lat, s.lng], { icon }).addTo(map)
+        .bindPopup(`<strong>${i + 1}. ${s.name}</strong><br>${s.note || ""}<br><a href="${s.map}" target="_blank" rel="noopener">在Google地圖開啟</a>`);
+      latlngs.push([s.lat, s.lng]);
     });
-    L.marker([s.lat, s.lng], { icon }).addTo(map)
-      .bindPopup(`<strong>${i + 1}. ${s.name}</strong><br>${s.note || ""}<br><a href="${s.map}" target="_blank" rel="noopener">在Google地圖開啟</a>`);
-    latlngs.push([s.lat, s.lng]);
-  });
-  L.polyline(latlngs, { color: '#2e6f95', weight: 3, dashArray: '6 6' }).addTo(map);
-  map.fitBounds(latlngs, { padding: [30, 30] });
-  dayMaps[idx] = map;
+    L.polyline(latlngs, { color: '#2e6f95', weight: 3, dashArray: '6 6' }).addTo(map);
+    map.fitBounds(latlngs, { padding: [30, 30] });
+    dayMaps[idx] = map;
+  } catch (e) {
+    console.warn("shop map init failed", e);
+  }
 }
 trip.days.forEach((day, idx) => {
   if (idx === 0) initShopMap(idx, day);
+});
+window.addEventListener("load", function(){
+  trip.days.forEach((day, idx) => {
+    if (!dayMaps[idx] && day.shops && day.shops.some(s => s.lat && s.lng)) {
+      initShopMap(idx, day);
+    }
+  });
 });
 
 const subwayIdx = trip.days.length;
@@ -651,6 +667,13 @@ subwayPanel.innerHTML = `
       建議先截圖存到手機相簿，離線也能查看。
     </div>
   </div>
+  ${trip.subwayMap.extra ? `
+  <div class="section">
+    <h3>🛫 ${trip.subwayMap.extra.caption}</h3>
+    <img src="${trip.subwayMap.extra.image}" alt="${trip.subwayMap.extra.caption}" style="width:100%; height:auto; border-radius:8px; background:#fff;">
+    ${trip.subwayMap.extra.note ? `<div class="note-line" style="margin-top:12px;">🚶 ${trip.subwayMap.extra.note}</div>` : ""}
+  </div>
+  ` : ""}
 `;
 mainEl.appendChild(subwayPanel);
 
