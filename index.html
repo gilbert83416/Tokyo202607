@@ -348,12 +348,8 @@ function setView(v){
 
 renderList();
 
-/* ===== 首次載入檢視 ===== */
-if (window.matchMedia("(max-width: 640px)").matches) {
-  setView("list");   // 手機預設清單
-} else {
-  initGlobe();       // 桌機預設地圖 → 建立地球儀
-}
+/* ===== 首次載入檢視：預設地圖（地球儀） ===== */
+initGlobe();
 </script>
 
 </body>
