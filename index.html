@@ -261,7 +261,7 @@ function fmtRange(start, end){
 function tripCount(key){ return trips.filter(t => t.continent === key).length; }
 
 /* ===== 3D 地球儀（globe.gl / WebGL；函式庫已內建於 repo，離線可用） ===== */
-const CONT_OF = { "Asia":"asia","Europe":"europe","Africa":"africa","North America":"americas","South America":"americas","Oceania":"oceania" };
+const A3_ZH = { JPN:"日本", KOR:"韓國", DEU:"德國", CHE:"瑞士", USA:"美國", MYS:"馬來西亞", SGP:"新加坡" };
 const visitedIso = new Set();
 trips.forEach(t => (t.iso || []).forEach(code => visitedIso.add(code)));
 
@@ -286,7 +286,13 @@ function initGlobe(){
       .polygonStrokeColor(() => "#ffffff")
       .polygonAltitude(f => visitedIso.has(f.properties.a3) ? 0.05 : 0.008)
       .polygonLabel(f => `<div style="font:600 12px sans-serif;color:#2b2b2b;background:#fff;padding:3px 7px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.3)">${f.properties.name}${visitedIso.has(f.properties.a3) ? " ✅" : ""}</div>`)
-      .onPolygonClick(f => { const k = CONT_OF[f.properties.cont]; if(k){ currentFilter = k; setView("list"); } });
+      .onPolygonClick(f => {
+        const a3 = f.properties.a3;
+        if (trips.some(t => (t.iso || []).includes(a3))) {   // only countries with a trip
+          currentFilter = { a3, label: A3_ZH[a3] || f.properties.name };
+          setView("list");
+        }
+      });
     try { globe.globeMaterial().color.set("#cfe3ef"); } catch(e){}
     sizeGlobe();
     const c = globe.controls();
@@ -303,14 +309,14 @@ function renderList(){
   const bar = document.getElementById("filter-bar");
   const list = document.getElementById("trip-list");
   let items = trips.slice().sort((a,b) => b.start.localeCompare(a.start));
-  if (currentFilter) items = items.filter(t => t.continent === currentFilter);
+  if (currentFilter) items = items.filter(t => (t.iso || []).includes(currentFilter.a3));
 
   bar.innerHTML = currentFilter
-    ? `<span class="filter-label">篩選：</span><button class="filter-chip" onclick="clearFilter()">🌏 ${continents[currentFilter].name} ✕</button>`
+    ? `<span class="filter-label">篩選：</span><button class="filter-chip" onclick="clearFilter()">📍 ${currentFilter.label} ✕</button>`
     : `<span class="filter-label">全部旅程 · 依日期排序</span>`;
 
   if (!items.length) {
-    list.innerHTML = `<div class="empty">此大洲尚無旅程，敬請期待 ✈️</div>`;
+    list.innerHTML = `<div class="empty">此國家尚無旅程，敬請期待 ✈️</div>`;
     return;
   }
   list.innerHTML = items.map(t => `
