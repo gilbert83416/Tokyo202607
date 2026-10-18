@@ -81,7 +81,8 @@
     color: var(--sub);
     margin: 4px 0 10px;
   }
-  svg.worldmap{ width:100%; height:auto; display:block; }
+  svg.worldmap{ width:100%; height:auto; display:block; touch-action:none; cursor:grab; }
+  svg.worldmap:active{ cursor:grabbing; }
   .continent{
     fill: var(--land);
     stroke: #fff;
@@ -303,6 +304,7 @@ function fmtRange(start, end){
 function tripCount(key){ return trips.filter(t => t.continent === key).length; }
 
 /* ===== 地圖：標記 + 點擊 ===== */
+let mapWasDragged = false;   // set true while panning so a drag isn't treated as a tap
 const badgesG = document.getElementById("badges");
 Object.keys(continents).forEach(key => {
   const count = tripCount(key);
@@ -311,9 +313,9 @@ Object.keys(continents).forEach(key => {
   if (count > 0) {
     const c = continents[key];
     // place the count badge to the RIGHT of the label (so it never covers the name)
-    let halfW;
-    try { halfW = label.getComputedTextLength() / 2; }
-    catch (e) { halfW = c.name.length * 4.6; }   // fallback estimate
+    let halfW = 0;
+    try { halfW = label.getComputedTextLength() / 2; } catch (e) {}
+    if (!halfW) halfW = c.name.length * 4.6;      // fallback when hidden / unsupported
     const bx = c.ax + halfW + 20;                 // 12px radius + 8px gap
     const by = c.ay - 5;                          // vertically centred on the label
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -325,7 +327,10 @@ Object.keys(continents).forEach(key => {
     txt.textContent = count;
     badgesG.appendChild(circle); badgesG.appendChild(txt);
   }
-  path.addEventListener("click", () => { currentFilter = key; setView("list"); });
+  path.addEventListener("click", () => {
+    if (mapWasDragged) return;                   // ignore clicks that were really pans
+    currentFilter = key; setView("list");
+  });
 });
 
 // colour only the countries actually visited (overlay on top of the grey continents)
@@ -379,6 +384,93 @@ function setView(v){
 }
 
 renderList();
+
+/* ===== 地圖：雙指縮放 + 拖曳平移（純前端，離線可用） ===== */
+(function enablePanZoom(){
+  const svg = document.querySelector("svg.worldmap");
+  if (!svg) return;
+  const BASE = { x:0, y:0, w:1000, h:386 };   // full-world viewBox
+  const MIN_W = 160;                            // most zoomed-in (≈6x)
+  let vb = { ...BASE };
+  const pointers = new Map();                   // active touch/mouse points
+  let last = null, startDist = 0, startVB = null, moved = 0;
+
+  function apply(){ svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`); }
+  function clamp(){
+    vb.w = Math.min(BASE.w, Math.max(MIN_W, vb.w));
+    vb.h = vb.w * (BASE.h / BASE.w);
+    vb.x = Math.min(BASE.w - vb.w, Math.max(0, vb.x));
+    vb.y = Math.min(BASE.h - vb.h, Math.max(0, vb.y));
+  }
+  // client px -> svg units
+  function toSvg(clientX, clientY){
+    const r = svg.getBoundingClientRect();
+    return { x: vb.x + (clientX - r.left) / r.width * vb.w,
+             y: vb.y + (clientY - r.top) / r.height * vb.h };
+  }
+  function zoomAt(clientX, clientY, factor){
+    const p = toSvg(clientX, clientY);
+    vb.w = vb.w / factor;
+    clamp();
+    // keep the point under the cursor fixed
+    const r = svg.getBoundingClientRect();
+    vb.x = p.x - (clientX - r.left) / r.width * vb.w;
+    vb.y = p.y - (clientY - r.top) / r.height * vb.h;
+    clamp(); apply();
+  }
+
+  svg.addEventListener("pointerdown", e => {
+    try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+    pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    moved = 0; mapWasDragged = false;
+    if (pointers.size === 1){ last = { x:e.clientX, y:e.clientY }; }
+    else if (pointers.size === 2){
+      const pts = [...pointers.values()];
+      startDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      startVB = { ...vb };
+    }
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    const pts = [...pointers.values()];
+    if (pointers.size >= 2){                     // pinch zoom
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const mid = { x:(pts[0].x + pts[1].x)/2, y:(pts[0].y + pts[1].y)/2 };
+      if (startDist > 0){
+        vb = { ...startVB };
+        zoomAt(mid.x, mid.y, dist / startDist);
+      }
+      mapWasDragged = true;
+    } else if (last){                            // single-finger / mouse drag = pan
+      const r = svg.getBoundingClientRect();
+      const dx = (e.clientX - last.x) / r.width * vb.w;
+      const dy = (e.clientY - last.y) / r.height * vb.h;
+      moved += Math.abs(e.clientX - last.x) + Math.abs(e.clientY - last.y);
+      if (moved > 6) mapWasDragged = true;
+      vb.x -= dx; vb.y -= dy; clamp(); apply();
+      last = { x:e.clientX, y:e.clientY };
+    }
+  });
+  function endPointer(e){
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) startDist = 0;
+    if (pointers.size === 1){ const p = [...pointers.values()][0]; last = { x:p.x, y:p.y }; }
+    if (pointers.size === 0){ last = null; setTimeout(() => { mapWasDragged = false; }, 50); }
+  }
+  svg.addEventListener("pointerup", endPointer);
+  svg.addEventListener("pointercancel", endPointer);
+  // mouse wheel zoom (desktop)
+  svg.addEventListener("wheel", e => {
+    e.preventDefault();
+    zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.2 : 1/1.2);
+  }, { passive:false });
+  // double-tap / double-click → reset to full world
+  svg.addEventListener("dblclick", e => { e.preventDefault(); vb = { ...BASE }; apply(); });
+})();
+
+/* ===== 手機預設顯示「清單」（地圖仍可一鍵切換） ===== */
+if (window.matchMedia("(max-width: 640px)").matches) setView("list");
 </script>
 
 </body>
