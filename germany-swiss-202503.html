@@ -21,6 +21,10 @@
   .info-box{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 18px; font-size:0.82rem; color:var(--sub); line-height:1.8; }
   .info-box b{ color:var(--ink); }
 
+  .info-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer; }
+  .info-head > span{ flex:1; }
+  .info-toggle{ flex:0 0 auto; width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:var(--bg); color:var(--accent2); font-size:1.05rem; font-weight:700; line-height:22px; text-align:center; cursor:pointer; padding:0; }
+  .info-more{ margin-top:8px; }
   nav.tabs{ max-width:760px; margin:20px auto 0; padding:0 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
   nav.tabs::-webkit-scrollbar{ display:none; }
   .tab-btn{ flex:0 0 auto; background:var(--card); border:1px solid var(--line); color:var(--sub); padding:9px 13px; border-radius:12px; font-size:0.78rem; cursor:pointer; text-align:center; line-height:1.4; transition:all 0.15s ease; }
@@ -249,6 +253,27 @@ function selectDay(idx){
   document.querySelectorAll(".day-panel").forEach((p,i)=>p.classList.toggle("active", i===idx));
   window.scrollTo({ top:0, behavior:"smooth" });
 }
+
+/* 詳細資訊：預設只顯示第一行，其餘可折疊 */
+(function collapseInfo(){
+  const box=document.getElementById("info-box");
+  if(!box) return;
+  const kids=Array.from(box.childNodes);
+  const brIdx=kids.findIndex(n=>n.nodeName==="BR");
+  if(brIdx<0) return;
+  const more=document.createElement("div");
+  more.className="info-more"; more.hidden=true;
+  kids.slice(brIdx+1).forEach(n=>more.appendChild(n));
+  box.removeChild(kids[brIdx]);
+  const head=document.createElement("div"); head.className="info-head";
+  const span=document.createElement("span");
+  Array.from(box.childNodes).forEach(n=>span.appendChild(n));
+  const btn=document.createElement("button"); btn.className="info-toggle"; btn.type="button"; btn.textContent="＋"; btn.setAttribute("aria-label","展開詳細資訊");
+  head.appendChild(span); head.appendChild(btn);
+  box.appendChild(head); box.appendChild(more);
+  head.addEventListener("click", ()=>{ more.hidden=!more.hidden; btn.textContent=more.hidden?"＋":"－"; });
+})();
+
 </script>
 
 </body>
