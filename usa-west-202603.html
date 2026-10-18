@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美西八日遊 3/30-4/6</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --card:#fff; --ink:#2b2b2b; --sub:#6b6b6b;
+    --accent:#d1495b; --accent2:#2e6f95; --line:#e6e1d8;
+    --shadow:0 2px 10px rgba(0,0,0,0.06); --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:"Hiragino Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:var(--bg); color:var(--ink); padding-bottom:40px; }
+  header{ background:linear-gradient(135deg,#2e6f95,#1a4a63); color:#fff; padding:28px 20px 22px; text-align:center; position:sticky; top:0; z-index:10; box-shadow:var(--shadow); }
+  header a.back{ position:absolute; left:16px; top:16px; color:#fff; text-decoration:none; font-size:0.85rem; opacity:0.9; }
+  header h1{ margin:0 0 6px; font-size:1.3rem; letter-spacing:0.5px; }
+  header .flights{ font-size:0.8rem; opacity:0.92; line-height:1.6; }
+
+  .info-card{ max-width:760px; margin:16px auto 0; padding:0 16px; }
+  .info-box{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 18px; font-size:0.82rem; color:var(--sub); line-height:1.8; }
+  .info-box b{ color:var(--ink); }
+
+  nav.tabs{ max-width:760px; margin:20px auto 0; padding:0 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tab-btn{ flex:0 0 auto; background:var(--card); border:1px solid var(--line); color:var(--sub); padding:9px 13px; border-radius:12px; font-size:0.78rem; cursor:pointer; text-align:center; line-height:1.4; transition:all 0.15s ease; }
+  .tab-btn .d{ font-weight:700; font-size:0.9rem; display:block; color:var(--ink); }
+  .tab-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tab-btn.active .d{ color:#fff; }
+
+  main{ max-width:760px; margin:18px auto; padding:0 16px; }
+  .day-panel{ display:none; }
+  .day-panel.active{ display:block; animation:fadein 0.25s ease; }
+  @keyframes fadein{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+
+  .day-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .day-header .date-big{ font-size:1.5rem; font-weight:800; color:var(--accent); }
+  .day-header .title{ font-size:1.02rem; font-weight:700; }
+  .day-header .weekday{ font-size:0.8rem; color:var(--sub); background:var(--line); padding:2px 8px; border-radius:10px; }
+
+  .section{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin-bottom:14px; }
+  .section h3{ margin:0 0 10px; font-size:0.9rem; color:var(--accent2); }
+
+  .spot-list{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .spot-list li a, .spot-list li .nolink{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; background:#faf9f6; border-radius:10px; text-decoration:none; color:inherit; width:100%; }
+  .spot-list li a:active{ background:#f0eee7; }
+  .spot-order{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--accent); color:#fff; font-size:0.7rem; font-weight:700; margin-right:8px; flex:0 0 20px; }
+  .spot-name{ font-weight:700; }
+  .spot-note{ color:var(--sub); font-size:0.76rem; display:block; margin-top:2px; margin-left:28px; }
+  .spot-type{ flex:0 0 auto; font-size:0.7rem; color:#fff; background:var(--accent2); padding:2px 8px; border-radius:8px; }
+  .pin{ flex:0 0 auto; font-size:0.9rem; }
+
+  .meal-row{ display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:0.86rem; }
+  .meal-row:last-child{ border-bottom:none; }
+  .meal-tag{ flex:0 0 42px; font-weight:700; color:var(--accent); }
+  .meal-tag.self{ color:var(--sub); }
+
+  .hotel-opts{ font-size:0.84rem; line-height:1.9; color:var(--ink); }
+  .hotel-opts .lead{ font-weight:700; color:var(--accent2); }
+
+  footer{ text-align:center; color:var(--sub); font-size:0.75rem; margin-top:30px; padding:0 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="index.html">← 旅行地圖</a>
+  <h1>🇺🇸 美西八日遊 · NBA & 大峽谷</h1>
+  <div class="flights" id="flight-info"></div>
+</header>
+
+<div class="info-card">
+  <div class="info-box" id="info-box"></div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+
+<footer>點擊景點名稱可開啟 Google 地圖 · 行程順序以當地實際安排與領隊說明為準</footer>
+
+<script>
+const data = {
+  agency: "可樂旅遊 USB033008JX6P｜美麗星世界、美西NBA體驗～環球影城、大峽谷奇景、棕櫚泉纜車、OUTLET購物八日",
+  flights: {
+    outbound: { date:"2026-03-30", weekday:"一", flight:"星宇航空 JX010", route:"桃園→洛杉磯(安大略)", depart:"20:05", arrive:"17:05" },
+    return:   { date:"2026-04-04", weekday:"六", flight:"星宇航空 JX009", route:"洛杉磯(安大略)→桃園", depart:"23:10", arrive:"04:15(+2)" }
+  },
+  days: [
+    {
+      date:"2026-03-30", weekday:"一", title:"桃園／洛杉磯",
+      spots:[ {name:"桃園機場集合出發", type:"航班", note:"星宇 JX010 桃園20:05→洛杉磯(安大略機場)17:05，飛行約11h40m（飛越換日線當天抵達）"} ],
+      meals:{ b:"—", l:"—", d:"美式風味餐" },
+      hotel:"Holiday Inn Diamond Bar（洛杉磯）"
+    },
+    {
+      date:"2026-03-31", weekday:"二", title:"洛杉磯市區・NBA 湖人主場",
+      spots:[
+        {name:"葛瑞菲斯天文台", type:"地標", note:"眺望 HOLLYWOOD 字母與洛城市景", q:"Griffith Observatory"},
+        {name:"好萊塢星光大道", type:"必訪", note:"2600+ 星星徽章", q:"Hollywood Walk of Fame"},
+        {name:"中國戲院 TCL Chinese Theatre", type:"地標", note:"影星手印腳印", q:"TCL Chinese Theatre"},
+        {name:"杜比劇院 Dolby Theatre", type:"地標", note:"奧斯卡頒獎永久會場", q:"Dolby Theatre"},
+        {name:"城市之光 Urban Light", type:"打卡", note:"LACMA 戶外路燈裝置藝術", q:"Urban Light LACMA"},
+        {name:"懸浮巨石 Levitated Mass", type:"打卡", note:"340噸花崗岩裝置藝術", q:"Levitated Mass LACMA"},
+        {name:"加密貨幣網體育館（NBA 球賽）", type:"NBA", note:"19:30 洛杉磯湖人 vs 克里夫蘭騎士；第三層隨機座位", q:"Crypto.com Arena"}
+      ],
+      meals:{ b:"旅館內用", l:"中式料理七菜一湯", d:"敬請自理" },
+      hotel:"Holiday Inn Diamond Bar（洛杉磯）"
+    },
+    {
+      date:"2026-04-01", weekday:"三", title:"好萊塢環球影城",
+      spots:[
+        {name:"好萊塢環球影城 Universal Studios", type:"主題樂園", note:"超級任天堂世界＋哈利波特魔法世界＋影城之旅", q:"Universal Studios Hollywood"}
+      ],
+      meals:{ b:"旅館內用", l:"敬請自理", d:"敬請自理" },
+      hotel:"Holiday Inn Diamond Bar（洛杉磯）"
+    },
+    {
+      date:"2026-04-02", weekday:"四", title:"洛杉磯→拉斯維加斯",
+      spots:[
+        {name:"拉斯維加斯北名牌大賣場 Premium Outlets North", type:"Outlet", note:"約175家名牌，停留約3小時（距洛杉磯約395公里）", q:"Las Vegas North Premium Outlets"},
+        {name:"拉斯維加斯 Las Vegas", type:"不夜城", note:"世界娛樂之都（距約8公里）", q:"Las Vegas"}
+      ],
+      meals:{ b:"旅館內用", l:"敬請自理", d:"中式料理七菜一湯" },
+      hotel:"Excalibur Hotel & Casino（拉斯維加斯）"
+    },
+    {
+      date:"2026-04-03", weekday:"五", title:"大峽谷→拉芙林",
+      spots:[
+        {name:"大峽谷國家公園（南緣）", type:"世界遺產", note:"世界七大奇景（距拉斯維加斯約436公里）", q:"Grand Canyon National Park South Rim"},
+        {name:"拉芙林 Laughlin", type:"賭城", note:"科羅拉多河畔水上賭城（距約320公里）", q:"Laughlin Nevada"}
+      ],
+      meals:{ b:"中式稀飯餐盒", l:"敬請自理", d:"電影主題餐廳 阿甘蝦風味餐" },
+      hotel:"Tropicana Laughlin（拉芙林）"
+    },
+    {
+      date:"2026-04-04", weekday:"六", title:"棕櫚泉纜車→洛杉磯・返程",
+      spots:[
+        {name:"棕櫚泉 Palm Springs", type:"度假", note:"沙漠綠洲度假勝地（距拉芙林約329公里）", q:"Palm Springs"},
+        {name:"棕櫚泉高空旋轉纜車", type:"纜車", note:"全球最長單纜電纜車，360°旋轉上2700m山頂", q:"Palm Springs Aerial Tramway"},
+        {name:"安大略購物中心 Ontario Mills", type:"購物", note:"200+店家（距約108公里）", q:"Ontario Mills"},
+        {name:"安大略機場搭機返台", type:"航班", note:"星宇 JX009 洛杉磯23:10→桃園04:15(+2)"}
+      ],
+      meals:{ b:"旅館內用", l:"IN-N-OUT 美式漢堡", d:"中日式海鮮自助餐" },
+      hotel:"夜宿機上 ✈️"
+    },
+    {
+      date:"2026-04-05", weekday:"日", title:"飛行中",
+      spots:[ {name:"飛行中（跨越換日線）", type:"航班", note:"星宇 JX009 洛杉磯→桃園，飛行約14h40m，夜宿機上"} ],
+      meals:{ b:"—", l:"—", d:"—" },
+      hotel:"夜宿機上 ✈️"
+    },
+    {
+      date:"2026-04-06", weekday:"一", title:"桃園・溫暖的家",
+      spots:[ {name:"抵達桃園國際機場", type:"返抵", note:"平安賦歸，結束美西八日之旅"} ],
+      meals:{ b:"—", l:"—", d:"—" },
+      hotel:"溫暖的家 🏠"
+    }
+  ]
+};
+
+function mapUrl(q){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
+function md(dateStr){ const [,m,d]=dateStr.split("-"); return `${parseInt(m)}/${parseInt(d)}`; }
+
+const f = data.flights;
+document.getElementById("flight-info").innerHTML = `
+  去程：${f.outbound.date}(${f.outbound.weekday}) ${f.outbound.flight} ${f.outbound.route} ${f.outbound.depart}→${f.outbound.arrive}<br>
+  回程：${f.return.date}(${f.return.weekday}) ${f.return.flight} ${f.return.route} ${f.return.depart}→${f.return.arrive}
+`;
+
+document.getElementById("info-box").innerHTML = `
+  <b>✈️ 星宇航空 JX 直飛</b>（含稅、含上網卡）。<br>
+  <b>🏀 NBA 球賽</b>：3/31 19:30 洛杉磯湖人 vs 克里夫蘭騎士（球場第三層隨機座位，禁帶背包）。<br>
+  <b>🎢 環球影城</b>：可加價升等快速通關（出發前21天洽詢）。<br>
+  <b>🧳 行李</b>：每人免費託運2件，每件≤23kg、三邊和≤158cm。<br>
+  <b>💰 小費</b>：領隊兼導遊＋司機 US$12／日 × 8天 = US$96。<br>
+  <span style="font-size:0.78rem;">${data.agency}</span>
+`;
+
+const tabsEl = document.getElementById("tabs");
+const mainEl = document.getElementById("main");
+
+data.days.forEach((day, idx) => {
+  const btn = document.createElement("button");
+  btn.className = "tab-btn" + (idx === 0 ? " active" : "");
+  btn.innerHTML = `<span class="d">${md(day.date)}</span>D${idx+1}·${day.weekday}`;
+  btn.onclick = () => selectDay(idx);
+  tabsEl.appendChild(btn);
+
+  const panel = document.createElement("div");
+  panel.className = "day-panel" + (idx === 0 ? " active" : "");
+  panel.id = `panel-${idx}`;
+
+  let html = `
+    <div class="day-header">
+      <span class="date-big">${md(day.date)}</span>
+      <span class="title">Day ${idx+1}　${day.title}</span>
+      <span class="weekday">週${day.weekday}</span>
+    </div>
+  `;
+
+  html += `<div class="section"><h3>🗺️ 行程景點</h3><ul class="spot-list">`;
+  day.spots.forEach((s, i) => {
+    const inner = `
+      <span>
+        <span class="spot-order">${i+1}</span><span class="spot-name">${s.name}</span>
+        ${s.note ? `<span class="spot-note">${s.note}</span>` : ""}
+      </span>
+      <span style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+        <span class="spot-type">${s.type}</span>${s.q ? `<span class="pin">📍</span>` : ""}
+      </span>`;
+    html += `<li>${ s.q ? `<a href="${mapUrl(s.q)}" target="_blank" rel="noopener">${inner}</a>` : `<span class="nolink">${inner}</span>` }</li>`;
+  });
+  html += `</ul></div>`;
+
+  const selfRe = /自理|機上|—/;
+  html += `
+    <div class="section"><h3>🍽️ 三餐</h3>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.b)?'self':''}">早</span><span>${day.meals.b}</span></div>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.l)?'self':''}">午</span><span>${day.meals.l}</span></div>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.d)?'self':''}">晚</span><span>${day.meals.d}</span></div>
+    </div>`;
+
+  const isHome = /溫暖的家|機上/.test(day.hotel);
+  html += `
+    <div class="section"><h3>🏨 住宿</h3>
+      <div class="hotel-opts"><span class="lead">${isHome ? "" : "飯店："}</span>${day.hotel}</div>
+    </div>`;
+
+  panel.innerHTML = html;
+  mainEl.appendChild(panel);
+});
+
+function selectDay(idx){
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>b.classList.toggle("active", i===idx));
+  document.querySelectorAll(".day-panel").forEach((p,i)=>p.classList.toggle("active", i===idx));
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+</script>
+
+</body>
+</html>

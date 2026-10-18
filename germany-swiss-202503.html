@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>德國 瑞士十日遊 3/2-3/11</title>
+<style>
+  :root{
+    --bg: #f5f3ee; --card:#fff; --ink:#2b2b2b; --sub:#6b6b6b;
+    --accent:#d1495b; --accent2:#2e6f95; --line:#e6e1d8;
+    --shadow:0 2px 10px rgba(0,0,0,0.06); --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:"Hiragino Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:var(--bg); color:var(--ink); padding-bottom:40px; }
+  header{ background:linear-gradient(135deg,#2e6f95,#1a4a63); color:#fff; padding:28px 20px 22px; text-align:center; position:sticky; top:0; z-index:10; box-shadow:var(--shadow); }
+  header a.back{ position:absolute; left:16px; top:16px; color:#fff; text-decoration:none; font-size:0.85rem; opacity:0.9; }
+  header h1{ margin:0 0 6px; font-size:1.3rem; letter-spacing:0.5px; }
+  header .flights{ font-size:0.8rem; opacity:0.92; line-height:1.6; }
+
+  .info-card{ max-width:760px; margin:16px auto 0; padding:0 16px; }
+  .info-box{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 18px; font-size:0.82rem; color:var(--sub); line-height:1.8; }
+  .info-box b{ color:var(--ink); }
+
+  nav.tabs{ max-width:760px; margin:20px auto 0; padding:0 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tab-btn{ flex:0 0 auto; background:var(--card); border:1px solid var(--line); color:var(--sub); padding:9px 13px; border-radius:12px; font-size:0.78rem; cursor:pointer; text-align:center; line-height:1.4; transition:all 0.15s ease; }
+  .tab-btn .d{ font-weight:700; font-size:0.9rem; display:block; color:var(--ink); }
+  .tab-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tab-btn.active .d{ color:#fff; }
+
+  main{ max-width:760px; margin:18px auto; padding:0 16px; }
+  .day-panel{ display:none; }
+  .day-panel.active{ display:block; animation:fadein 0.25s ease; }
+  @keyframes fadein{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+
+  .day-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .day-header .date-big{ font-size:1.5rem; font-weight:800; color:var(--accent); }
+  .day-header .title{ font-size:1.02rem; font-weight:700; }
+  .day-header .weekday{ font-size:0.8rem; color:var(--sub); background:var(--line); padding:2px 8px; border-radius:10px; }
+
+  .section{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin-bottom:14px; }
+  .section h3{ margin:0 0 10px; font-size:0.9rem; color:var(--accent2); }
+
+  .spot-list{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .spot-list li a, .spot-list li .nolink{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; background:#faf9f6; border-radius:10px; text-decoration:none; color:inherit; width:100%; }
+  .spot-list li a:active{ background:#f0eee7; }
+  .spot-order{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--accent); color:#fff; font-size:0.7rem; font-weight:700; margin-right:8px; flex:0 0 20px; }
+  .spot-name{ font-weight:700; }
+  .spot-note{ color:var(--sub); font-size:0.76rem; display:block; margin-top:2px; margin-left:28px; }
+  .spot-type{ flex:0 0 auto; font-size:0.7rem; color:#fff; background:var(--accent2); padding:2px 8px; border-radius:8px; }
+  .pin{ flex:0 0 auto; font-size:0.9rem; }
+
+  .meal-row{ display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:0.86rem; }
+  .meal-row:last-child{ border-bottom:none; }
+  .meal-tag{ flex:0 0 42px; font-weight:700; color:var(--accent); }
+  .meal-tag.self{ color:var(--sub); }
+
+  .hotel-opts{ font-size:0.84rem; line-height:1.9; color:var(--ink); }
+  .hotel-opts .lead{ font-weight:700; color:var(--accent2); }
+
+  footer{ text-align:center; color:var(--sub); font-size:0.75rem; margin-top:30px; padding:0 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="index.html">← 旅行地圖</a>
+  <h1>🇩🇪🇨🇭 德國 瑞士十日遊</h1>
+  <div class="flights" id="flight-info"></div>
+</header>
+
+<div class="info-card">
+  <div class="info-box" id="info-box"></div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+
+<footer>點擊景點名稱可開啟 Google 地圖 · 行程順序以當地實際安排與領隊說明為準</footer>
+
+<script>
+const data = {
+  agency: "可樂旅遊 EHE030210CI5｜德瑞超值選～瑞吉山環景健行、德國童話城堡、阿爾卑斯小鎮、瑞士無煙山區飯店10日",
+  flights: {
+    outbound: { date:"2025-03-02", weekday:"日", flight:"中華航空 CI061", route:"桃園→法蘭克福", depart:"23:10", arrive:"07:35(+1)" },
+    return:   { date:"2025-03-10", weekday:"一", flight:"中華航空 CI062", route:"法蘭克福→桃園", depart:"10:40", arrive:"06:10(+1)" }
+  },
+  days: [
+    {
+      date:"2025-03-02", weekday:"日", title:"桃園／法蘭克福",
+      spots:[ {name:"桃園機場集合出發", type:"航班", note:"中華航空 CI061 桃園23:10→法蘭克福07:35(+1)，飛行約14小時"} ],
+      meals:{ b:"—", l:"—", d:"機上餐食" },
+      hotel:"夜宿機上 ✈️"
+    },
+    {
+      date:"2025-03-03", weekday:"一", title:"海德堡・蒂蒂湖（黑森林）",
+      spots:[
+        {name:"海德堡 Heidelberg（纜車上或下）", type:"古城", note:"內卡河畔大學古城、海德古堡", q:"Heidelberg Castle"},
+        {name:"蒂蒂湖 Titisee", type:"湖泊", note:"黑森林著名度假湖區（距海德堡約219公里）", q:"Titisee"}
+      ],
+      meals:{ b:"機上簡餐", l:"中式料理六菜一湯", d:"巴伐利亞風味湖鮮料理（香煎黑森林鱒魚柳）＋黑森林蛋糕" },
+      hotel:"Holiday Inn Villingen-Schwenningen（黑森林區域）"
+    },
+    {
+      date:"2025-03-04", weekday:"二", title:"伯恩・蘇黎世",
+      spots:[
+        {name:"伯恩老城區 Bern", type:"世界遺產", note:"瑞士首都「熊城」，順路參觀熊公園", q:"Bern Old Town"},
+        {name:"蘇黎世市區觀光 Zürich", type:"市區", note:"距伯恩約129公里", q:"Zürich"},
+        {name:"班霍夫大街 Bahnhofstrasse", type:"購物", note:"蘇黎世精品大街", q:"Bahnhofstrasse Zürich"}
+      ],
+      meals:{ b:"飯店早餐", l:"中式料理六菜一湯", d:"敬請自理（方便逛街）" },
+      hotel:"IntercityHotel Zürich Airport（蘇黎世）"
+    },
+    {
+      date:"2025-03-05", weekday:"三", title:"盧森・瑞吉山 Mt. Rigi",
+      spots:[
+        {name:"盧森 Lucerne（市區觀光）", type:"市區", note:"卡貝爾橋、獅子紀念碑", q:"Lucerne"},
+        {name:"瑞吉山 Mt. Rigi（山巒皇后）", type:"登山健行", note:"懷舊登山火車上山＋新型環保列車下山，Rigi Kulm 山頂360°環景13湖", q:"Rigi Kulm"}
+      ],
+      meals:{ b:"飯店早餐", l:"敬請自理（方便逛街）", d:"山區飯店主廚風味料理（瑞士鄉村烤豬排）〔一泊二食〕" },
+      hotel:"Hotel Rigi Kaltbad（海拔1500m無煙山城，登山火車抵達；水療須現場付費約41瑞郎、限16歲以上）"
+    },
+    {
+      date:"2025-03-06", weekday:"四", title:"木橋・康斯坦茲・聖加侖",
+      spots:[
+        {name:"拉珀斯維爾-胡爾登木橋 Holzbrücke Rapperswil-Hurden", type:"地標", note:"瑞士最長木橋（距瑞吉約69公里）", q:"Holzbrücke Rapperswil-Hurden"},
+        {name:"康斯坦茲 Constance", type:"湖城", note:"博登湖畔（距約59公里）", q:"Konstanz"},
+        {name:"聖加侖修道院大教堂 Cathedral of St. Gallen", type:"世界遺產", note:"距約39公里", q:"Cathedral of St. Gallen"}
+      ],
+      meals:{ b:"飯店早餐", l:"敬請自理（方便逛街）", d:"中式料理六菜一湯" },
+      hotel:"Vienna House Martinspark Dornbirn（奧地利阿爾卑斯小鎮）"
+    },
+    {
+      date:"2025-03-07", weekday:"五", title:"威斯教堂・新天鵝堡",
+      spots:[
+        {name:"威斯教堂 Wieskirche", type:"世界遺產", note:"洛可可朝聖教堂（距小鎮約139公里）", q:"Wieskirche"},
+        {name:"新天鵝堡 Neuschwanstein Castle", type:"童話城堡", note:"迪士尼城堡原型（距約22公里）", q:"Neuschwanstein Castle"}
+      ],
+      meals:{ b:"飯店早餐", l:"巴伐利亞風味料理（香烤德國豬腳）", d:"中式六菜一湯＋水果" },
+      hotel:"NH München Ost Conference Center（慕尼黑）"
+    },
+    {
+      date:"2025-03-08", weekday:"六", title:"慕尼黑・羅騰堡",
+      spots:[
+        {name:"奧林匹克園區 Olympiapark", type:"景點", note:"1972慕尼黑奧運場館", q:"Olympiapark München"},
+        {name:"BMW 世界 BMW Welt", type:"展館", note:"BMW 品牌體驗館", q:"BMW Welt München"},
+        {name:"瑪莉恩廣場 Marienplatz", type:"廣場", note:"慕尼黑市區觀光、新市政廳", q:"Marienplatz München"},
+        {name:"羅騰堡 Rothenburg ob der Tauber", type:"中世紀古鎮", note:"童話小鎮（距約239公里）", q:"Rothenburg ob der Tauber"}
+      ],
+      meals:{ b:"飯店早餐", l:"敬請自理（方便逛街）", d:"小鎮古風德式料理（香煎雞肉佐醬汁）" },
+      hotel:"Prinzhotel Rothenburg（羅騰堡）"
+    },
+    {
+      date:"2025-03-09", weekday:"日", title:"威特海姆購物村・法蘭克福",
+      spots:[
+        {name:"威特海姆購物村 Wertheim Village", type:"Outlet", note:"營業 周一～周六 10:00~20:00（距羅騰堡約99公里）", q:"Wertheim Village"},
+        {name:"羅馬廣場 Römerberg", type:"廣場", note:"法蘭克福老城廣場（距約89公里）", q:"Römerberg Frankfurt"}
+      ],
+      meals:{ b:"飯店早餐", l:"敬請自理（方便逛街）", d:"中式料理六菜一湯" },
+      hotel:"IntercityHotel Frankfurt Hauptbahnhof（法蘭克福）"
+    },
+    {
+      date:"2025-03-10", weekday:"一", title:"法蘭克福／桃園",
+      spots:[ {name:"法蘭克福搭機返台", type:"航班", note:"中華航空 CI062 法蘭克福10:40→桃園06:10(+1)，飛行約13小時"} ],
+      meals:{ b:"飯店早餐", l:"機上餐食", d:"機上餐食" },
+      hotel:"夜宿機上 ✈️"
+    },
+    {
+      date:"2025-03-11", weekday:"二", title:"桃園・溫暖的家",
+      spots:[ {name:"抵達桃園國際機場", type:"返抵", note:"平安賦歸，結束德瑞10日之旅"} ],
+      meals:{ b:"機上餐食", l:"—", d:"—" },
+      hotel:"溫暖的家 🏠"
+    }
+  ]
+};
+
+function mapUrl(q){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
+function md(dateStr){ const [,m,d]=dateStr.split("-"); return `${parseInt(m)}/${parseInt(d)}`; }
+
+const f = data.flights;
+document.getElementById("flight-info").innerHTML = `
+  去程：${f.outbound.date}(${f.outbound.weekday}) ${f.outbound.flight} ${f.outbound.route} ${f.outbound.depart}→${f.outbound.arrive}<br>
+  回程：${f.return.date}(${f.return.weekday}) ${f.return.flight} ${f.return.route} ${f.return.depart}→${f.return.arrive}
+`;
+
+document.getElementById("info-box").innerHTML = `
+  <b>✈️ 中華航空 CI 直飛</b>（長程航班含機上餐食）。<br>
+  <b>🏔️ 瑞士無煙山區飯店一泊二食</b>：Hotel Rigi Kaltbad，海拔1500m無煙山城，僅能搭登山火車抵達。<br>
+  <b>🧳 行李牌顏色</b>：紅色；領隊全程隨團服務。<br>
+  <b>🗓️ 10天</b>　<span style="font-size:0.78rem;">${data.agency}</span>
+`;
+
+const tabsEl = document.getElementById("tabs");
+const mainEl = document.getElementById("main");
+
+data.days.forEach((day, idx) => {
+  const btn = document.createElement("button");
+  btn.className = "tab-btn" + (idx === 0 ? " active" : "");
+  btn.innerHTML = `<span class="d">${md(day.date)}</span>D${idx+1}·${day.weekday}`;
+  btn.onclick = () => selectDay(idx);
+  tabsEl.appendChild(btn);
+
+  const panel = document.createElement("div");
+  panel.className = "day-panel" + (idx === 0 ? " active" : "");
+  panel.id = `panel-${idx}`;
+
+  let html = `
+    <div class="day-header">
+      <span class="date-big">${md(day.date)}</span>
+      <span class="title">Day ${idx+1}　${day.title}</span>
+      <span class="weekday">週${day.weekday}</span>
+    </div>
+  `;
+
+  html += `<div class="section"><h3>🗺️ 行程景點</h3><ul class="spot-list">`;
+  day.spots.forEach((s, i) => {
+    const inner = `
+      <span>
+        <span class="spot-order">${i+1}</span><span class="spot-name">${s.name}</span>
+        ${s.note ? `<span class="spot-note">${s.note}</span>` : ""}
+      </span>
+      <span style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+        <span class="spot-type">${s.type}</span>${s.q ? `<span class="pin">📍</span>` : ""}
+      </span>`;
+    html += `<li>${ s.q ? `<a href="${mapUrl(s.q)}" target="_blank" rel="noopener">${inner}</a>` : `<span class="nolink">${inner}</span>` }</li>`;
+  });
+  html += `</ul></div>`;
+
+  const selfRe = /自理|機上|—/;
+  html += `
+    <div class="section"><h3>🍽️ 三餐</h3>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.b)?'self':''}">早</span><span>${day.meals.b}</span></div>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.l)?'self':''}">午</span><span>${day.meals.l}</span></div>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.d)?'self':''}">晚</span><span>${day.meals.d}</span></div>
+    </div>`;
+
+  const isHome = /溫暖的家|機上/.test(day.hotel);
+  html += `
+    <div class="section"><h3>🏨 住宿</h3>
+      <div class="hotel-opts"><span class="lead">${isHome ? "" : "飯店："}</span>${day.hotel}</div>
+    </div>`;
+
+  panel.innerHTML = html;
+  mainEl.appendChild(panel);
+});
+
+function selectDay(idx){
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>b.classList.toggle("active", i===idx));
+  document.querySelectorAll(".day-panel").forEach((p,i)=>p.classList.toggle("active", i===idx));
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+</script>
+
+</body>
+</html>

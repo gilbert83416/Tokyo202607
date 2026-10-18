@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新馬五日遊 10/31-11/4</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --card:#fff; --ink:#2b2b2b; --sub:#6b6b6b;
+    --accent:#d1495b; --accent2:#2e6f95; --line:#e6e1d8;
+    --shadow:0 2px 10px rgba(0,0,0,0.06); --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:"Hiragino Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:var(--bg); color:var(--ink); padding-bottom:40px; }
+  header{ background:linear-gradient(135deg,#2e6f95,#1a4a63); color:#fff; padding:28px 20px 22px; text-align:center; position:sticky; top:0; z-index:10; box-shadow:var(--shadow); }
+  header a.back{ position:absolute; left:16px; top:16px; color:#fff; text-decoration:none; font-size:0.85rem; opacity:0.9; }
+  header h1{ margin:0 0 6px; font-size:1.3rem; letter-spacing:0.5px; }
+  header .flights{ font-size:0.8rem; opacity:0.92; line-height:1.6; }
+
+  .info-card{ max-width:760px; margin:16px auto 0; padding:0 16px; }
+  .info-box{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 18px; font-size:0.82rem; color:var(--sub); line-height:1.8; }
+  .info-box b{ color:var(--ink); }
+
+  nav.tabs{ max-width:760px; margin:20px auto 0; padding:0 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tab-btn{ flex:0 0 auto; background:var(--card); border:1px solid var(--line); color:var(--sub); padding:9px 13px; border-radius:12px; font-size:0.78rem; cursor:pointer; text-align:center; line-height:1.4; transition:all 0.15s ease; }
+  .tab-btn .d{ font-weight:700; font-size:0.9rem; display:block; color:var(--ink); }
+  .tab-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tab-btn.active .d{ color:#fff; }
+
+  main{ max-width:760px; margin:18px auto; padding:0 16px; }
+  .day-panel{ display:none; }
+  .day-panel.active{ display:block; animation:fadein 0.25s ease; }
+  @keyframes fadein{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+
+  .day-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .day-header .date-big{ font-size:1.5rem; font-weight:800; color:var(--accent); }
+  .day-header .title{ font-size:1.02rem; font-weight:700; }
+  .day-header .weekday{ font-size:0.8rem; color:var(--sub); background:var(--line); padding:2px 8px; border-radius:10px; }
+
+  .section{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin-bottom:14px; }
+  .section h3{ margin:0 0 10px; font-size:0.9rem; color:var(--accent2); }
+
+  .spot-list{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .spot-list li a, .spot-list li .nolink{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; background:#faf9f6; border-radius:10px; text-decoration:none; color:inherit; width:100%; }
+  .spot-list li a:active{ background:#f0eee7; }
+  .spot-order{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--accent); color:#fff; font-size:0.7rem; font-weight:700; margin-right:8px; flex:0 0 20px; }
+  .spot-name{ font-weight:700; }
+  .spot-note{ color:var(--sub); font-size:0.76rem; display:block; margin-top:2px; margin-left:28px; }
+  .spot-type{ flex:0 0 auto; font-size:0.7rem; color:#fff; background:var(--accent2); padding:2px 8px; border-radius:8px; }
+  .pin{ flex:0 0 auto; font-size:0.9rem; }
+
+  .meal-row{ display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:0.86rem; }
+  .meal-row:last-child{ border-bottom:none; }
+  .meal-tag{ flex:0 0 42px; font-weight:700; color:var(--accent); }
+  .meal-tag.self{ color:var(--sub); }
+
+  .hotel-opts{ font-size:0.84rem; line-height:1.9; color:var(--ink); }
+  .hotel-opts .lead{ font-weight:700; color:var(--accent2); }
+
+  footer{ text-align:center; color:var(--sub); font-size:0.75rem; margin-top:30px; padding:0 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="index.html">← 旅行地圖</a>
+  <h1>🇲🇾🇸🇬 新馬五日遊 · 樂高樂園 & 馬六甲</h1>
+  <div class="flights" id="flight-info"></div>
+</header>
+
+<div class="info-card">
+  <div class="info-box" id="info-box"></div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+
+<footer>點擊景點名稱可開啟 Google 地圖 · 行程順序以當地實際安排與領隊說明為準</footer>
+
+<script>
+const data = {
+  agency: "可樂旅遊 SKA103105CI5B｜新馬樂樂無限～樂高樂園、馬六甲三輪車、吉隆坡住五星、濱樂雅渡假村五日（無自費・無購物站）",
+  flights: {
+    outbound: { date:"2025-10-31", weekday:"五", flight:"中華航空 CI753", route:"桃園→新加坡", depart:"08:20", arrive:"13:05" },
+    return:   { date:"2025-11-04", weekday:"二", flight:"中華航空 CI722", route:"吉隆坡→桃園", depart:"14:35", arrive:"19:15" }
+  },
+  days: [
+    {
+      date:"2025-10-31", weekday:"五", title:"桃園／新加坡・濱海灣",
+      spots:[
+        {name:"魚尾獅公園 Merlion Park", type:"地標", note:"新加坡地標，可同框金沙與濱海藝術中心", q:"Merlion Park Singapore"},
+        {name:"濱海灣金沙娛樂城", type:"地標", note:"螺旋橋＋精品名店、LV水晶宮旗艦店", q:"Marina Bay Sands"},
+        {name:"濱海灣花園（超級樹）", type:"花園", note:"Gardens by the Bay，文化遺產花園＋超級樹", q:"Gardens by the Bay"},
+        {name:"超級樹交響樂幻彩燈光秀", type:"燈光秀", note:"每晚 19:45 開始，約15分鐘（免費、視天候）", q:"Supertree Grove"},
+        {name:"新山 Johor Bahru", type:"城市", note:"出關前往馬來西亞新山住宿，入住時間較晚", q:"Johor Bahru"}
+      ],
+      meals:{ b:"—", l:"機上簡餐／亞坤下午茶", d:"Jurassic Nest FoodHall 美食廣場自理" },
+      hotel:"Hotel Ramada 新山／OZO Medini／IBIS Styles Johor／Holiday Inn Express 或同級（新山）"
+    },
+    {
+      date:"2025-11-01", weekday:"六", title:"樂高樂園→馬六甲",
+      spots:[
+        {name:"樂高樂園 LEGOLAND Malaysia", type:"主題樂園", note:"1500萬塊積木、40項遊樂設施、雲霄飛車", q:"Legoland Malaysia"},
+        {name:"SEA LIFE 海洋探索中心", type:"水族館", note:"11個主題區，近距離認識海洋生物", q:"Sea Life Legoland Malaysia"},
+        {name:"馬六甲 Malacca", type:"古城", note:"世界遺產古城（當晚入住馬六甲）", q:"Malacca"}
+      ],
+      meals:{ b:"飯店早餐", l:"敬請自理", d:"奶油蝦風味餐（餐標 RM35）" },
+      hotel:"Baba House Melaka／SWISS GARDEN／Ibis Melaka／THE PINES 或同級（馬六甲）"
+    },
+    {
+      date:"2025-11-02", weekday:"日", title:"馬六甲古城・三輪車",
+      spots:[
+        {name:"荷蘭紅屋 Stadthuys", type:"地標", note:"17世紀荷蘭殖民建築、城市廣場", q:"Stadthuys Malacca"},
+        {name:"大鐘樓 Clock Tower", type:"地標", note:"1886年建，至今運作", q:"Tan Beng Swee Clock Tower Malacca"},
+        {name:"基督堂 Christ Church", type:"教堂", note:"1753年荷據時期，馬國最古老新教教堂", q:"Christ Church Melaka"},
+        {name:"聖保羅教堂 St. Paul's Church", type:"古蹟", note:"1849年哥德式教堂，山丘俯瞰古城", q:"St Paul's Church Melaka"},
+        {name:"聖地牙哥城堡 A Famosa", type:"古堡", note:"16世紀葡萄牙人建，俯望馬六甲海峽", q:"A Famosa Melaka"},
+        {name:"雞場街 Jonker Street", type:"老街", note:"古董街、百年古屋民房", q:"Jonker Street Malacca"},
+        {name:"三輪車遊古城", type:"體驗", note:"彩繪人力三輪車（兩人一台，車伕小費 RM4/台自理）"}
+      ],
+      meals:{ b:"飯店早餐", l:"七記娘惹餐廳＋飲料（RM35）", d:"飯店內晚餐" },
+      hotel:"PARKROYAL A'Famosa Melaka Resort 濱樂雅度假村 或同級"
+    },
+    {
+      date:"2025-11-03", weekday:"一", title:"野生動物園→吉隆坡",
+      spots:[
+        {name:"A'Famosa 野生動物園", type:"動物園", note:"搭乘 Safari 遊園車近距離觀賞野生動物", q:"A Famosa Safari Wonderland"},
+        {name:"鬼仔巷 Kwai Chai Hong", type:"打卡", note:"華人移民生活巷弄壁畫", q:"Kwai Chai Hong Kuala Lumpur"},
+        {name:"REX KL 復古迷宮書店", type:"打卡", note:"佔地6000平方英尺的書海迷宮", q:"REX KL"},
+        {name:"雙子星花園廣場（國油雙峰塔 KLCC）", type:"地標", note:"馬來西亞最著名地標（外觀拍照）", q:"Petronas Twin Towers"},
+        {name:"亞羅街夜市 Jalan Alor", type:"夜市", note:"吉隆坡最知名夜市，當地美食", q:"Jalan Alor"}
+      ],
+      meals:{ b:"飯店早餐", l:"園區簡餐＋飲料", d:"道地風味餐＋桔子水（餐標 RM40）" },
+      hotel:"Hyatt Centric City Centre／Shangri-La KL／Pavilion Hotel 或同級（吉隆坡五星）"
+    },
+    {
+      date:"2025-11-04", weekday:"二", title:"布城→吉隆坡／桃園",
+      spots:[
+        {name:"布城粉紅清真寺 Putra Mosque", type:"清真寺", note:"玫瑰色花崗岩，又名粉紅清真寺（女性入內需借罩袍，開放至16:00）", q:"Putra Mosque Putrajaya"},
+        {name:"布城湖 Putrajaya Lake", type:"湖泊", note:"人工湖，都市水源與蓄洪", q:"Putrajaya Lake"},
+        {name:"首相署 Perdana Putra", type:"地標", note:"綠穹頂陶土色大樓，布城標誌建築（外觀）", q:"Perdana Putra"},
+        {name:"首相府廣場", type:"廣場", note:"4.2公里林蔭大道（外觀）", q:"Putrajaya Boulevard"},
+        {name:"吉隆坡機場搭機返台", type:"航班", note:"中華航空 CI722 吉隆坡14:35→桃園19:15"}
+      ],
+      meals:{ b:"飯店早餐", l:"機場自理", d:"—" },
+      hotel:"可愛的家 🏠"
+    }
+  ]
+};
+
+function mapUrl(q){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
+function md(dateStr){ const [,m,d]=dateStr.split("-"); return `${parseInt(m)}/${parseInt(d)}`; }
+
+const f = data.flights;
+document.getElementById("flight-info").innerHTML = `
+  去程：${f.outbound.date}(${f.outbound.weekday}) ${f.outbound.flight} ${f.outbound.route} ${f.outbound.depart}→${f.outbound.arrive}<br>
+  回程：${f.return.date}(${f.return.weekday}) ${f.return.flight} ${f.return.route} ${f.return.depart}→${f.return.arrive}
+`;
+
+document.getElementById("info-box").innerHTML = `
+  <b>✈️ 中華航空 CI 直飛</b>（含稅、無自費、無購物站）：去程進新加坡、回程出吉隆坡。<br>
+  <b>🛕 布城清真寺</b>：女性入內需於入口右方借罩袍，開放至16:00；遇回教節日僅能外觀拍照。<br>
+  <b>🚲 馬六甲三輪車</b>：兩人一台，車伕小費 RM4/台自理。<br>
+  <b>💰 小費</b>：領隊＋導遊＋司機 NT$300／日 × 5天；行李/房間小費星馬另計。<br>
+  <span style="font-size:0.78rem;">${data.agency}</span>
+`;
+
+const tabsEl = document.getElementById("tabs");
+const mainEl = document.getElementById("main");
+
+data.days.forEach((day, idx) => {
+  const btn = document.createElement("button");
+  btn.className = "tab-btn" + (idx === 0 ? " active" : "");
+  btn.innerHTML = `<span class="d">${md(day.date)}</span>D${idx+1}·${day.weekday}`;
+  btn.onclick = () => selectDay(idx);
+  tabsEl.appendChild(btn);
+
+  const panel = document.createElement("div");
+  panel.className = "day-panel" + (idx === 0 ? " active" : "");
+  panel.id = `panel-${idx}`;
+
+  let html = `
+    <div class="day-header">
+      <span class="date-big">${md(day.date)}</span>
+      <span class="title">Day ${idx+1}　${day.title}</span>
+      <span class="weekday">週${day.weekday}</span>
+    </div>
+  `;
+
+  html += `<div class="section"><h3>🗺️ 行程景點</h3><ul class="spot-list">`;
+  day.spots.forEach((s, i) => {
+    const inner = `
+      <span>
+        <span class="spot-order">${i+1}</span><span class="spot-name">${s.name}</span>
+        ${s.note ? `<span class="spot-note">${s.note}</span>` : ""}
+      </span>
+      <span style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+        <span class="spot-type">${s.type}</span>${s.q ? `<span class="pin">📍</span>` : ""}
+      </span>`;
+    html += `<li>${ s.q ? `<a href="${mapUrl(s.q)}" target="_blank" rel="noopener">${inner}</a>` : `<span class="nolink">${inner}</span>` }</li>`;
+  });
+  html += `</ul></div>`;
+
+  const selfRe = /自理|機上|—/;
+  html += `
+    <div class="section"><h3>🍽️ 三餐</h3>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.b)?'self':''}">早</span><span>${day.meals.b}</span></div>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.l)?'self':''}">午</span><span>${day.meals.l}</span></div>
+      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.d)?'self':''}">晚</span><span>${day.meals.d}</span></div>
+    </div>`;
+
+  const isHome = /可愛的家|溫暖的家|機上/.test(day.hotel);
+  html += `
+    <div class="section"><h3>🏨 住宿</h3>
+      <div class="hotel-opts"><span class="lead">${isHome ? "" : "飯店："}</span>${day.hotel}</div>
+    </div>`;
+
+  panel.innerHTML = html;
+  mainEl.appendChild(panel);
+});
+
+function selectDay(idx){
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>b.classList.toggle("active", i===idx));
+  document.querySelectorAll(".day-panel").forEach((p,i)=>p.classList.toggle("active", i===idx));
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+</script>
+
+</body>
+</html>
