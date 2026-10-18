@@ -20,11 +20,11 @@
   .info-card{ max-width:760px; margin:16px auto 0; padding:0 16px; }
   .info-box{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 18px; font-size:0.82rem; color:var(--sub); line-height:1.8; }
   .info-box b{ color:var(--ink); }
-
   .info-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer; }
   .info-head > span{ flex:1; }
   .info-toggle{ flex:0 0 auto; width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:var(--bg); color:var(--accent2); font-size:1.05rem; font-weight:700; line-height:22px; text-align:center; cursor:pointer; padding:0; }
   .info-more{ margin-top:8px; }
+
   nav.tabs{ max-width:760px; margin:20px auto 0; padding:0 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
   nav.tabs::-webkit-scrollbar{ display:none; }
   .tab-btn{ flex:0 0 auto; background:var(--card); border:1px solid var(--line); color:var(--sub); padding:9px 13px; border-radius:12px; font-size:0.78rem; cursor:pointer; text-align:center; line-height:1.4; transition:all 0.15s ease; }
@@ -54,11 +54,6 @@
   .spot-type{ flex:0 0 auto; font-size:0.7rem; color:#fff; background:var(--accent2); padding:2px 8px; border-radius:8px; }
   .pin{ flex:0 0 auto; font-size:0.9rem; }
 
-  .meal-row{ display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:0.86rem; }
-  .meal-row:last-child{ border-bottom:none; }
-  .meal-tag{ flex:0 0 42px; font-weight:700; color:var(--accent); }
-  .meal-tag.self{ color:var(--sub); }
-
   .hotel-opts{ font-size:0.84rem; line-height:1.9; color:var(--ink); }
   .hotel-opts .lead{ font-weight:700; color:var(--accent2); }
 
@@ -69,7 +64,7 @@
 
 <header>
   <a class="back" href="index.html">← 旅行地圖</a>
-  <h1>🇲🇾🇸🇬 新馬五日遊 · 樂高樂園 & 馬六甲</h1>
+  <h1>🇲🇾🇸🇬 新馬五日遊 · 雨林 & 雲頂</h1>
   <div class="flights" id="flight-info"></div>
 </header>
 
@@ -84,71 +79,55 @@
 
 <script>
 const data = {
-  agency: "可樂旅遊 SKA103105CI5B｜新馬樂樂無限～樂高樂園、馬六甲三輪車、吉隆坡住五星、濱樂雅渡假村五日（無自費・無購物站）",
+  agency: "可樂旅遊 SKC122505BR5B｜新馬超值選～雨林探險園、馬六甲三輪車、雲頂高原纜車、兩晚五星飯店五日",
   flights: {
-    outbound: { date:"2025-12-25", weekday:"四", flight:"中華航空 CI753", route:"桃園→新加坡", depart:"08:20", arrive:"13:05" },
-    return:   { date:"2025-12-29", weekday:"一", flight:"中華航空 CI722", route:"吉隆坡→桃園", depart:"14:35", arrive:"19:15" }
+    outbound: { date:"2025-12-25", weekday:"四", flight:"長榮航空 BR225", route:"桃園→新加坡", depart:"07:25", arrive:"12:05" },
+    return:   { date:"2025-12-29", weekday:"一", flight:"長榮航空 BR228", route:"吉隆坡→桃園", depart:"15:25", arrive:"20:05" }
   },
   days: [
     {
-      date:"2025-12-25", weekday:"四", title:"桃園／新加坡・濱海灣",
+      date:"2025-12-25", weekday:"四", title:"新加坡・新山",
       spots:[
-        {name:"魚尾獅公園 Merlion Park", type:"地標", note:"新加坡地標，可同框金沙與濱海藝術中心", q:"Merlion Park Singapore"},
-        {name:"濱海灣金沙娛樂城", type:"地標", note:"螺旋橋＋精品名店、LV水晶宮旗艦店", q:"Marina Bay Sands"},
-        {name:"濱海灣花園（超級樹）", type:"花園", note:"Gardens by the Bay，文化遺產花園＋超級樹", q:"Gardens by the Bay"},
-        {name:"超級樹交響樂幻彩燈光秀", type:"燈光秀", note:"每晚 19:45 開始，約15分鐘（免費、視天候）", q:"Supertree Grove"},
-        {name:"新山 Johor Bahru", type:"城市", note:"出關前往馬來西亞新山住宿，入住時間較晚", q:"Johor Bahru"}
+        {name:"星耀樟宜 Jewel Changi Airport", type:"地標", note:"世界最高室內瀑布 Rain Vortex、森林谷", q:"Jewel Changi Airport"},
+        {name:"魚尾獅公園 Merlion Park", type:"地標", note:"新加坡地標，可同框金沙", q:"Merlion Park Singapore"},
+        {name:"Rainforest Wild Asia", type:"雨林探險", note:"Mandai 全新雨林探險園", q:"Rainforest Wild Asia Singapore"},
+        {name:"前往新山 Johor Bahru", type:"交通", note:"出關後入住馬來西亞新山"}
       ],
-      meals:{ b:"—", l:"機上簡餐／亞坤下午茶", d:"Jurassic Nest FoodHall 美食廣場自理" },
-      hotel:"Hotel Ramada 新山／OZO Medini／IBIS Styles Johor／Holiday Inn Express 或同級（新山）"
+      hotel:"IBIS Styles Johor Iskandar Puteri（新山）"
     },
     {
-      date:"2025-12-26", weekday:"五", title:"樂高樂園→馬六甲",
+      date:"2025-12-26", weekday:"五", title:"馬六甲古城",
       spots:[
-        {name:"樂高樂園 LEGOLAND Malaysia", type:"主題樂園", note:"1500萬塊積木、40項遊樂設施、雲霄飛車", q:"Legoland Malaysia"},
-        {name:"SEA LIFE 海洋探索中心", type:"水族館", note:"11個主題區，近距離認識海洋生物", q:"Sea Life Legoland Malaysia"},
-        {name:"馬六甲 Malacca", type:"古城", note:"世界遺產古城（當晚入住馬六甲）", q:"Malacca"}
+        {name:"馬六甲 Malacca", type:"世界遺產", note:"世界遺產古城（荷蘭紅屋、雞場街）", q:"Malacca"},
+        {name:"三輪車遊古城", type:"體驗", note:"彩繪人力三輪車遊馬六甲古城"},
+        {name:"前往波德申 Port Dickson", type:"交通", note:"海濱度假城，當晚住宿"}
       ],
-      meals:{ b:"飯店早餐", l:"敬請自理", d:"奶油蝦風味餐（餐標 RM35）" },
-      hotel:"Baba House Melaka／SWISS GARDEN／Ibis Melaka／THE PINES 或同級（馬六甲）"
+      hotel:"QUEST HOTEL 奎斯特酒店（波德申 Port Dickson）"
     },
     {
-      date:"2025-12-27", weekday:"六", title:"馬六甲古城・三輪車",
+      date:"2025-12-27", weekday:"六", title:"吉隆坡市區・雙子星",
       spots:[
-        {name:"荷蘭紅屋 Stadthuys", type:"地標", note:"17世紀荷蘭殖民建築、城市廣場", q:"Stadthuys Malacca"},
-        {name:"大鐘樓 Clock Tower", type:"地標", note:"1886年建，至今運作", q:"Tan Beng Swee Clock Tower Malacca"},
-        {name:"基督堂 Christ Church", type:"教堂", note:"1753年荷據時期，馬國最古老新教教堂", q:"Christ Church Melaka"},
-        {name:"聖保羅教堂 St. Paul's Church", type:"古蹟", note:"1849年哥德式教堂，山丘俯瞰古城", q:"St Paul's Church Melaka"},
-        {name:"聖地牙哥城堡 A Famosa", type:"古堡", note:"16世紀葡萄牙人建，俯望馬六甲海峽", q:"A Famosa Melaka"},
-        {name:"雞場街 Jonker Street", type:"老街", note:"古董街、百年古屋民房", q:"Jonker Street Malacca"},
-        {name:"三輪車遊古城", type:"體驗", note:"彩繪人力三輪車（兩人一台，車伕小費 RM4/台自理）"}
+        {name:"吉隆坡市中心 Pusat Bandaraya", type:"市區", note:"獨立廣場、蘇丹阿都沙末大廈周邊", q:"Dataran Merdeka Kuala Lumpur"},
+        {name:"雙子星 國油雙峰塔 KLCC", type:"地標", note:"Petronas Twin Towers，馬來西亞最著名地標", q:"Petronas Twin Towers"}
       ],
-      meals:{ b:"飯店早餐", l:"七記娘惹餐廳＋飲料（RM35）", d:"飯店內晚餐" },
-      hotel:"PARKROYAL A'Famosa Melaka Resort 濱樂雅度假村 或同級"
+      hotel:"Putrajaya Marriott Hotel 布城萬豪酒店（太子城）"
     },
     {
-      date:"2025-12-28", weekday:"日", title:"野生動物園→吉隆坡",
+      date:"2025-12-28", weekday:"日", title:"雲頂高原・黑風洞",
       spots:[
-        {name:"A'Famosa 野生動物園", type:"動物園", note:"搭乘 Safari 遊園車近距離觀賞野生動物", q:"A Famosa Safari Wonderland"},
-        {name:"鬼仔巷 Kwai Chai Hong", type:"打卡", note:"華人移民生活巷弄壁畫", q:"Kwai Chai Hong Kuala Lumpur"},
-        {name:"REX KL 復古迷宮書店", type:"打卡", note:"佔地6000平方英尺的書海迷宮", q:"REX KL"},
-        {name:"雙子星花園廣場（國油雙峰塔 KLCC）", type:"地標", note:"馬來西亞最著名地標（外觀拍照）", q:"Petronas Twin Towers"},
-        {name:"亞羅街夜市 Jalan Alor", type:"夜市", note:"吉隆坡最知名夜市，當地美食", q:"Jalan Alor"}
+        {name:"雲頂高原 Genting Highlands", type:"高原纜車", note:"搭高原纜車上山，娛樂城與主題樂園", q:"Genting Highlands"},
+        {name:"黑風洞 Batu Caves", type:"景點", note:"彩色階梯與印度教石窟廟", q:"Batu Caves"}
       ],
-      meals:{ b:"飯店早餐", l:"園區簡餐＋飲料", d:"道地風味餐＋桔子水（餐標 RM40）" },
-      hotel:"Hyatt Centric City Centre／Shangri-La KL／Pavilion Hotel 或同級（吉隆坡五星）"
+      hotel:"Putrajaya Marriott Hotel 布城萬豪酒店（太子城）"
     },
     {
       date:"2025-12-29", weekday:"一", title:"布城→吉隆坡／桃園",
       spots:[
-        {name:"布城粉紅清真寺 Putra Mosque", type:"清真寺", note:"玫瑰色花崗岩，又名粉紅清真寺（女性入內需借罩袍，開放至16:00）", q:"Putra Mosque Putrajaya"},
-        {name:"布城湖 Putrajaya Lake", type:"湖泊", note:"人工湖，都市水源與蓄洪", q:"Putrajaya Lake"},
-        {name:"首相署 Perdana Putra", type:"地標", note:"綠穹頂陶土色大樓，布城標誌建築（外觀）", q:"Perdana Putra"},
-        {name:"首相府廣場", type:"廣場", note:"4.2公里林蔭大道（外觀）", q:"Putrajaya Boulevard"},
-        {name:"吉隆坡機場搭機返台", type:"航班", note:"中華航空 CI722 吉隆坡14:35→桃園19:15"}
+        {name:"布城粉紅清真寺 Putra Mosque", type:"清真寺", note:"玫瑰色花崗岩清真寺（女性入內需借罩袍）", q:"Putra Mosque Putrajaya"},
+        {name:"布城植物園 Putrajaya Botanical Garden", type:"植物園", note:"馬來西亞最大植物園", q:"Putrajaya Botanical Garden"},
+        {name:"吉隆坡機場搭機返台", type:"航班", note:"長榮 BR228 吉隆坡15:25→桃園20:05"}
       ],
-      meals:{ b:"飯店早餐", l:"機場自理", d:"—" },
-      hotel:"可愛的家 🏠"
+      hotel:"溫暖的家 🏠"
     }
   ]
 };
@@ -163,10 +142,10 @@ document.getElementById("flight-info").innerHTML = `
 `;
 
 document.getElementById("info-box").innerHTML = `
-  <b>✈️ 中華航空 CI 直飛</b>（含稅、無自費、無購物站）：去程進新加坡、回程出吉隆坡。<br>
-  <b>🛕 布城清真寺</b>：女性入內需於入口右方借罩袍，開放至16:00；遇回教節日僅能外觀拍照。<br>
-  <b>🚲 馬六甲三輪車</b>：兩人一台，車伕小費 RM4/台自理。<br>
-  <b>💰 小費</b>：領隊＋導遊＋司機 NT$300／日 × 5天；行李/房間小費星馬另計。<br>
+  <b>✈️ 長榮航空 BR 直飛</b>：去程 BR225 進新加坡、回程 BR228 出吉隆坡。<br>
+  <b>🏨 兩晚五星</b>：布城萬豪酒店 Putrajaya Marriott（太子城）。<br>
+  <b>🚲 馬六甲古城三輪車</b>・<b>🚠 雲頂高原纜車</b> 體驗。<br>
+  <b>🧳 行李牌顏色</b>：紫色；領隊全程隨團服務。<br>
   <span style="font-size:0.78rem;">${data.agency}</span>
 `;
 
@@ -206,13 +185,15 @@ data.days.forEach((day, idx) => {
   });
   html += `</ul></div>`;
 
-  const selfRe = /自理|機上|—/;
-  html += `
-    <div class="section"><h3>🍽️ 三餐</h3>
-      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.b)?'self':''}">早</span><span>${day.meals.b}</span></div>
-      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.l)?'self':''}">午</span><span>${day.meals.l}</span></div>
-      <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.d)?'self':''}">晚</span><span>${day.meals.d}</span></div>
-    </div>`;
+  if (day.meals){
+    const selfRe = /自理|機上|—/;
+    html += `
+      <div class="section"><h3>🍽️ 三餐</h3>
+        <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.b)?'self':''}">早</span><span>${day.meals.b}</span></div>
+        <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.l)?'self':''}">午</span><span>${day.meals.l}</span></div>
+        <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.d)?'self':''}">晚</span><span>${day.meals.d}</span></div>
+      </div>`;
+  }
 
   const isHome = /可愛的家|溫暖的家|機上/.test(day.hotel);
   html += `
@@ -249,7 +230,6 @@ function selectDay(idx){
   box.appendChild(head); box.appendChild(more);
   head.addEventListener("click", ()=>{ more.hidden=!more.hidden; btn.textContent=more.hidden?"＋":"－"; });
 })();
-
 </script>
 
 </body>
