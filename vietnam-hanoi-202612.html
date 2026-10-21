@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北越河內五日遊 12/26-12/30</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --card:#fff; --ink:#2b2b2b; --sub:#6b6b6b;
+    --accent:#d1495b; --accent2:#2e6f95; --line:#e6e1d8;
+    --shadow:0 2px 10px rgba(0,0,0,0.06); --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:"Hiragino Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:var(--bg); color:var(--ink); padding-bottom:40px; }
+  header{ background:linear-gradient(135deg,#2e6f95,#1a4a63); color:#fff; padding:28px 20px 22px; text-align:center; position:sticky; top:0; z-index:10; box-shadow:var(--shadow); }
+  header a.back{ position:absolute; left:16px; top:16px; color:#fff; text-decoration:none; font-size:0.85rem; opacity:0.9; }
+  header h1{ margin:0 0 6px; font-size:1.3rem; letter-spacing:0.5px; }
+  header .flights{ font-size:0.8rem; opacity:0.92; line-height:1.6; }
+
+  .info-card{ max-width:760px; margin:16px auto 0; padding:0 16px; }
+  .info-box{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 18px; font-size:0.82rem; color:var(--sub); line-height:1.8; }
+  .info-box b{ color:var(--ink); }
+  .info-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; cursor:pointer; }
+  .info-head > span{ flex:1; }
+  .info-toggle{ flex:0 0 auto; width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:var(--bg); color:var(--accent2); font-size:1.05rem; font-weight:700; line-height:22px; text-align:center; cursor:pointer; padding:0; }
+  .info-more{ margin-top:8px; }
+
+  nav.tabs{ max-width:760px; margin:20px auto 0; padding:0 16px; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tab-btn{ flex:0 0 auto; background:var(--card); border:1px solid var(--line); color:var(--sub); padding:9px 13px; border-radius:12px; font-size:0.78rem; cursor:pointer; text-align:center; line-height:1.4; transition:all 0.15s ease; }
+  .tab-btn .d{ font-weight:700; font-size:0.9rem; display:block; color:var(--ink); }
+  .tab-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .tab-btn.active .d{ color:#fff; }
+
+  main{ max-width:760px; margin:18px auto; padding:0 16px; }
+  .day-panel{ display:none; }
+  .day-panel.active{ display:block; animation:fadein 0.25s ease; }
+  @keyframes fadein{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+
+  .day-header{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .day-header .date-big{ font-size:1.5rem; font-weight:800; color:var(--accent); }
+  .day-header .title{ font-size:1.02rem; font-weight:700; }
+  .day-header .weekday{ font-size:0.8rem; color:var(--sub); background:var(--line); padding:2px 8px; border-radius:10px; }
+
+  .section{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 18px; margin-bottom:14px; }
+  .section h3{ margin:0 0 10px; font-size:0.9rem; color:var(--accent2); }
+
+  .spot-list{ list-style:none; margin:0; padding:0; display:grid; gap:8px; }
+  .spot-list li a, .spot-list li .nolink{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; background:#faf9f6; border-radius:10px; text-decoration:none; color:inherit; width:100%; }
+  .spot-list li a:active{ background:#f0eee7; }
+  .spot-order{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--accent); color:#fff; font-size:0.7rem; font-weight:700; margin-right:8px; flex:0 0 20px; }
+  .spot-name{ font-weight:700; }
+  .spot-note{ color:var(--sub); font-size:0.76rem; display:block; margin-top:2px; margin-left:28px; }
+  .spot-type{ flex:0 0 auto; font-size:0.7rem; color:#fff; background:var(--accent2); padding:2px 8px; border-radius:8px; }
+  .pin{ flex:0 0 auto; font-size:0.9rem; }
+
+  .meal-row{ display:flex; gap:10px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:0.86rem; }
+  .meal-row:last-child{ border-bottom:none; }
+  .meal-tag{ flex:0 0 42px; font-weight:700; color:var(--accent); }
+  .meal-tag.self{ color:var(--sub); }
+
+  .hotel-opts{ font-size:0.84rem; line-height:1.9; color:var(--ink); }
+  .hotel-opts .lead{ font-weight:700; color:var(--accent2); }
+
+  footer{ text-align:center; color:var(--sub); font-size:0.75rem; margin-top:30px; padding:0 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back" href="index.html">← 旅行地圖</a>
+  <h1>🇻🇳 北越河內五日遊 · 下龍灣 & 陸龍灣</h1>
+  <div class="flights" id="flight-info"></div>
+</header>
+
+<div class="info-card">
+  <div class="info-box" id="info-box"></div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+
+<footer>點擊景點名稱可開啟 Google 地圖 · 行程順序以當地實際安排與領隊說明為準</footer>
+
+<script>
+const data = {
+  agency: "可樂旅遊 VHZ122605BR6B｜北越限定GO～最美雙龍灣、皇后號遊船、纜車摩天輪、河內百花春城五日",
+  flights: {
+    outbound: { date:"2026-12-26", weekday:"六", flight:"長榮航空 BR385", route:"桃園→河內", depart:"14:50", arrive:"17:15" },
+    return:   { date:"2026-12-30", weekday:"三", flight:"長榮航空 BR386", route:"河內→桃園", depart:"18:20", arrive:"21:55" }
+  },
+  days: [
+    {
+      date:"2026-12-26", weekday:"六", title:"桃園／河內",
+      spots:[
+        {name:"桃園機場搭機出發", type:"航班", note:"長榮 BR385 桃園14:50→河內17:15"},
+        {name:"河內 Hanoi（百花春城）", type:"古城", note:"千年古城，法國殖民風情與越南傳統交融", q:"Hanoi"}
+      ],
+      meals:{ b:"—", l:"機上簡餐", d:"中越式料理風味餐（含飲料 US8）" },
+      hotel:"Somerset Hoa Binh Hanoi／Sen Grand Hotel／FR Hotel 或同級（河內）"
+    },
+    {
+      date:"2026-12-27", weekday:"日", title:"河內・下龍灣",
+      spots:[
+        {name:"西湖 West Lake", type:"景點", note:"河內最大湖泊", q:"West Lake Hanoi"},
+        {name:"鎮國寺 Tran Quoc Pagoda", type:"古寺", note:"西湖畔越南最古老佛寺之一", q:"Tran Quoc Pagoda Hanoi"},
+        {name:"皇后雙層纜車", type:"纜車", note:"金氏世界紀錄最大纜車（230人/艙），俯瞰下龍灣", q:"Sun World Halong Queen Cable Car"},
+        {name:"太陽之眼摩天輪 Sun Wheel", type:"摩天輪", note:"高215公尺，繞行一圈約20分", q:"Sun Wheel Halong"},
+        {name:"下龍灣 Ha Long Bay", type:"世界遺產", note:"海上桂林，聯合國世界自然遺產", q:"Ha Long Bay"}
+      ],
+      meals:{ b:"飯店早餐", l:"媽媽廚房越式料理（含飲料 US10）", d:"海鮮風味餐（含飲料 US8）" },
+      hotel:"Halong Palace／Halong Dream／Novotel Halong Bay 或同級（下龍灣）"
+    },
+    {
+      date:"2026-12-28", weekday:"一", title:"下龍灣皇后號遊船",
+      spots:[
+        {name:"皇后號遊船 Halong Queen Cruise", type:"遊船", note:"暢遊海上桂林、鬥雞石，船上享海鮮自助餐", q:"Ha Long Bay"},
+        {name:"驚訝洞 Sung Sot Cave", type:"鐘乳石洞", note:"下龍灣最大最美鐘乳石洞", q:"Sung Sot Cave"},
+        {name:"Titop 英雄島", type:"小島", note:"登頂俯瞰下龍灣全景、沙灘戲水", q:"Titop Island"}
+      ],
+      meals:{ b:"飯店早餐", l:"船上自助餐（不含酒水）", d:"鯉魚鍋風味餐（含飲料 US8）" },
+      hotel:"Halong Palace／Halong Dream／Novotel Halong Bay 或同級（下龍灣）"
+    },
+    {
+      date:"2026-12-29", weekday:"二", title:"下龍灣→寧平→河內",
+      spots:[
+        {name:"寧平 Ninh Binh", type:"城市", note:"陸龍灣所在地", q:"Ninh Binh"},
+        {name:"陸龍灣・長安 Trang An", type:"世界遺產", note:"混合自然與文化財世界遺產，群山環繞河水蜿蜒", q:"Trang An Ninh Binh"},
+        {name:"碧洞古寺 Bich Dong Pagoda", type:"古寺", note:"依山洞而建的古寺", q:"Bich Dong Pagoda"},
+        {name:"長安生態小舟遊船", type:"遊船", note:"4人1艘小鐵皮舟，穿溶洞遊河（船家小費已含）", q:"Trang An Scenic Landscape Complex"},
+        {name:"乳膠寢具／生活用品專賣店", type:"購物", note:"停留約40～60分"}
+      ],
+      meals:{ b:"飯店早餐", l:"寧平農家風味餐（含飲料 US8）", d:"燒烤 BBQ 火鍋吃到飽（含飲料 US18）" },
+      hotel:"Somerset Hoa Binh Hanoi／Sen Grand Hotel／FR Hotel 或同級（河內）"
+    },
+    {
+      date:"2026-12-30", weekday:"三", title:"河內市區→桃園",
+      spots:[
+        {name:"還劍湖 Hoan Kiem Lake", type:"景點", note:"河內市中心湖泊、玉山祠", q:"Hoan Kiem Lake"},
+        {name:"聖若瑟主教座堂", type:"教堂", note:"河內新哥德式天主教堂", q:"St Joseph Cathedral Hanoi"},
+        {name:"36 古街散策", type:"老街", note:"河內老城區古街", q:"Hanoi Old Quarter"},
+        {name:"巴亭廣場 Ba Dinh Square", type:"廣場", note:"越南獨立宣言發表地", q:"Ba Dinh Square Hanoi"},
+        {name:"胡志明陵寢", type:"地標", note:"胡志明遺體安葬處", q:"Ho Chi Minh Mausoleum"},
+        {name:"總督府・一柱廟", type:"古蹟", note:"法式總督府與越南地標一柱廟", q:"One Pillar Pagoda Hanoi"},
+        {name:"河內機場搭機返台", type:"航班", note:"長榮 BR386 河內18:20→桃園21:55"}
+      ],
+      meals:{ b:"飯店早餐", l:"方便逛街，敬請自理", d:"機上簡餐" },
+      hotel:"溫暖的家 🏠"
+    }
+  ]
+};
+
+function mapUrl(q){ return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q); }
+function md(dateStr){ const [,m,d]=dateStr.split("-"); return `${parseInt(m)}/${parseInt(d)}`; }
+
+const f = data.flights;
+document.getElementById("flight-info").innerHTML = `
+  去程：${f.outbound.date}(${f.outbound.weekday}) ${f.outbound.flight} ${f.outbound.route} ${f.outbound.depart}→${f.outbound.arrive}<br>
+  回程：${f.return.date}(${f.return.weekday}) ${f.return.flight} ${f.return.route} ${f.return.depart}→${f.return.arrive}
+`;
+
+document.getElementById("info-box").innerHTML = `
+  <b>✈️ 長榮航空 BR 直飛</b>：去程 BR385、回程 BR386（桃園⇄河內）。<br>
+  <b>🪪 入境</b>：入境前72小時內上網申辦越南電子入境卡，QR 碼截圖或印出備查。<br>
+  <b>🧳 行李</b>：托運 23kg×1、手提 7kg×1（56×36×23cm）。<br>
+  <b>💰 小費</b>：領隊＋導遊＋司機 NT$300／日 × 5天。<br>
+  <b>🎁 贈送</b>：每日礦泉水、椰子水、越南斗笠、摺扇、萬靈油、團體照。<br>
+  <span style="font-size:0.78rem;">${data.agency}</span>
+`;
+
+const tabsEl = document.getElementById("tabs");
+const mainEl = document.getElementById("main");
+
+data.days.forEach((day, idx) => {
+  const btn = document.createElement("button");
+  btn.className = "tab-btn" + (idx === 0 ? " active" : "");
+  btn.innerHTML = `<span class="d">${md(day.date)}</span>D${idx+1}·${day.weekday}`;
+  btn.onclick = () => selectDay(idx);
+  tabsEl.appendChild(btn);
+
+  const panel = document.createElement("div");
+  panel.className = "day-panel" + (idx === 0 ? " active" : "");
+  panel.id = `panel-${idx}`;
+
+  let html = `
+    <div class="day-header">
+      <span class="date-big">${md(day.date)}</span>
+      <span class="title">Day ${idx+1}　${day.title}</span>
+      <span class="weekday">週${day.weekday}</span>
+    </div>
+  `;
+
+  html += `<div class="section"><h3>🗺️ 行程景點</h3><ul class="spot-list">`;
+  day.spots.forEach((s, i) => {
+    const inner = `
+      <span>
+        <span class="spot-order">${i+1}</span><span class="spot-name">${s.name}</span>
+        ${s.note ? `<span class="spot-note">${s.note}</span>` : ""}
+      </span>
+      <span style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+        <span class="spot-type">${s.type}</span>${s.q ? `<span class="pin">📍</span>` : ""}
+      </span>`;
+    html += `<li>${ s.q ? `<a href="${mapUrl(s.q)}" target="_blank" rel="noopener">${inner}</a>` : `<span class="nolink">${inner}</span>` }</li>`;
+  });
+  html += `</ul></div>`;
+
+  if (day.meals){
+    const selfRe = /自理|機上|—/;
+    html += `
+      <div class="section"><h3>🍽️ 三餐</h3>
+        <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.b)?'self':''}">早</span><span>${day.meals.b}</span></div>
+        <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.l)?'self':''}">午</span><span>${day.meals.l}</span></div>
+        <div class="meal-row"><span class="meal-tag ${selfRe.test(day.meals.d)?'self':''}">晚</span><span>${day.meals.d}</span></div>
+      </div>`;
+  }
+
+  const isHome = /溫暖的家|機上/.test(day.hotel);
+  html += `
+    <div class="section"><h3>🏨 住宿</h3>
+      <div class="hotel-opts"><span class="lead">${isHome ? "" : "飯店："}</span>${day.hotel}</div>
+    </div>`;
+
+  panel.innerHTML = html;
+  mainEl.appendChild(panel);
+});
+
+function selectDay(idx){
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>b.classList.toggle("active", i===idx));
+  document.querySelectorAll(".day-panel").forEach((p,i)=>p.classList.toggle("active", i===idx));
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+/* 詳細資訊：預設只顯示第一行，其餘可折疊 */
+(function collapseInfo(){
+  const box=document.getElementById("info-box");
+  if(!box) return;
+  const kids=Array.from(box.childNodes);
+  const brIdx=kids.findIndex(n=>n.nodeName==="BR");
+  if(brIdx<0) return;
+  const more=document.createElement("div");
+  more.className="info-more"; more.hidden=true;
+  kids.slice(brIdx+1).forEach(n=>more.appendChild(n));
+  box.removeChild(kids[brIdx]);
+  const head=document.createElement("div"); head.className="info-head";
+  const span=document.createElement("span");
+  Array.from(box.childNodes).forEach(n=>span.appendChild(n));
+  const btn=document.createElement("button"); btn.className="info-toggle"; btn.type="button"; btn.textContent="＋"; btn.setAttribute("aria-label","展開詳細資訊");
+  head.appendChild(span); head.appendChild(btn);
+  box.appendChild(head); box.appendChild(more);
+  head.addEventListener("click", ()=>{ more.hidden=!more.hidden; btn.textContent=more.hidden?"＋":"－"; });
+})();
+</script>
+
+</body>
+</html>
