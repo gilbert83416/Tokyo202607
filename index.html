@@ -6,158 +6,150 @@
 <title>My Travel Map</title>
 <style>
   :root{
-    --bg: #f5f3ee;
-    --card: #ffffff;
-    --ink: #2b2b2b;
-    --sub: #6b6b6b;
-    --accent: #d1495b;
-    --accent2: #2e6f95;
-    --line: #e6e1d8;
-    --ocean: #d7e7ef;
-    --land: #cfc6b4;
-    --land-active: #e8a0ab;
-    --shadow: 0 2px 10px rgba(0,0,0,0.06);
-    --radius: 16px;
+    --ink: #e9eef6;
+    --sub: #97a6bd;
+    --accent: #e0607a;
+    --accent2: #6fb6e0;
+    --glass: rgba(255,255,255,0.055);
+    --glass-brd: rgba(255,255,255,0.12);
+    --radius: 18px;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
     font-family: "Hiragino Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: var(--bg);
     color: var(--ink);
-    padding-bottom: 50px;
+    padding-bottom: 46px;
+    background:
+      radial-gradient(1200px 700px at 50% -8%, #1c2a4d 0%, #101a33 42%, #070b17 78%, #05070f 100%) fixed;
+    -webkit-font-smoothing: antialiased;
   }
   header{
-    background: linear-gradient(135deg, #2e6f95, #1a4a63);
-    color: #fff;
-    padding: 26px 20px 20px;
+    padding: 30px 20px 18px;
     text-align: center;
-    box-shadow: var(--shadow);
+    background: transparent;
   }
-  header h1{ margin:0 0 4px; font-size: 1.4rem; letter-spacing: 1px; }
-  header .sub{ font-size: 0.8rem; opacity: 0.9; }
-
-  .wrap{ max-width: 860px; margin: 0 auto; padding: 0 16px; }
-
-  .toggle{
-    display:flex;
-    gap:8px;
-    justify-content:center;
-    margin: 18px auto 6px;
+  header h1{ margin:0; font-size: 1.55rem; font-weight: 800; letter-spacing: 2px; display:flex; align-items:center; justify-content:center; gap:10px; }
+  header h1 .g-text{
+    background: linear-gradient(90deg,#fff,#cfe0ff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
+  header h1 .g-emoji{ filter: drop-shadow(0 2px 10px rgba(120,160,255,0.4)); }
+
+  .wrap{ max-width: 880px; margin: 0 auto; padding: 0 16px; }
+
+  .toggle{ display:flex; gap:10px; justify-content:center; margin: 6px auto 4px; }
   .toggle button{
     flex: 0 0 auto;
-    background: var(--card);
-    border: 1px solid var(--line);
+    background: var(--glass);
+    border: 1px solid var(--glass-brd);
     color: var(--sub);
-    padding: 9px 20px;
-    border-radius: 20px;
+    padding: 9px 22px;
+    border-radius: 22px;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.15s ease;
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    transition: all 0.18s ease;
   }
+  .toggle button:hover{ color:#fff; border-color: rgba(255,255,255,0.25); }
   .toggle button.active{
-    background: var(--accent);
-    border-color: var(--accent);
-    color:#fff;
-    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), #c33f5c);
+    border-color: transparent; color:#fff; font-weight: 700;
+    box-shadow: 0 6px 18px rgba(224,96,122,0.35);
   }
 
-  .view{ display:none; animation: fade 0.25s ease; }
+  .view{ display:none; animation: fade 0.3s ease; }
   .view.active{ display:block; }
-  @keyframes fade{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+  @keyframes fade{ from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
 
-  /* ---- map ---- */
+  /* ---- map: space scene ---- */
   .map-card{
-    background: var(--card);
+    position: relative;
+    margin-top: 14px;
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 14px;
-    margin-top: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: radial-gradient(130% 110% at 50% 0%, #15213f 0%, #0a1126 52%, #05070f 100%);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.55), inset 0 0 70px rgba(10,20,45,0.6);
   }
-  .map-hint{
-    text-align:center;
-    font-size:0.8rem;
-    color: var(--sub);
-    margin: 4px 0 10px;
-  }
-  /* ---- 3D globe ---- */
-  #globeViz{ width:100%; height:62vh; max-height:520px; min-height:300px; cursor:grab; }
+  .stars{ position:absolute; inset:0; z-index:1; overflow:hidden; pointer-events:none; }
+  .star-layer{ position:absolute; top:0; left:0; width:1px; height:1px; border-radius:50%; background:transparent; }
+  #stars-twinkle{ animation: twinkle 3.6s ease-in-out infinite; }
+  @keyframes twinkle{ 0%,100%{opacity:.45} 50%{opacity:1} }
+
+  #globeViz{ position:relative; z-index:2; width:100%; height:64vh; max-height:560px; min-height:320px; cursor:grab; }
   #globeViz:active{ cursor:grabbing; }
   #globeViz canvas{ display:block; outline:none; }
-  .globe-note{ text-align:center; font-size:0.78rem; color:var(--sub); margin-top:8px; }
+  #country-labels{ position:absolute; left:0; top:0; right:0; z-index:4; height:64vh; max-height:560px; min-height:320px; pointer-events:none; overflow:hidden; }
+  .clabel3d{
+    position:absolute; left:0; top:0; white-space:nowrap; will-change:transform;
+    font: 600 11px/1 "Hiragino Sans","Noto Sans TC",sans-serif; color:#fff;
+    background: rgba(10,16,30,0.6); border:1px solid rgba(255,255,255,0.16);
+    padding: 2px 7px; border-radius: 7px; text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  }
+
+  /* 3D 月亮（由 globe.gl 定位；z 由圖層控制） */
+  .moon3d{
+    width:24px; height:24px; border-radius:50%; position:absolute; left:0; top:0; pointer-events:none; will-change:transform;
+    background: radial-gradient(circle at 34% 30%, #fffef7 0%, #e4e6ec 48%, #b9bdc9 74%, #8990a0 100%);
+    box-shadow: 0 0 14px 3px rgba(210,225,255,0.45),
+                inset -4px -3px 7px rgba(0,0,0,0.35),
+                inset 3px 3px 5px rgba(255,255,255,0.3);
+  }
+  .moon3d .crater{ position:absolute; border-radius:50%; background:rgba(0,0,0,0.10); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.25); }
+  .moon3d .crater.c1{ width:6px; height:6px; left:6px; top:7px; }
+  .moon3d .crater.c2{ width:3.5px; height:3.5px; left:14px; top:13px; }
 
   /* ---- list ---- */
-  .filter-bar{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    flex-wrap:wrap;
-    margin: 14px 0 4px;
-    min-height: 30px;
-  }
+  .filter-bar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin: 16px 0 4px; min-height: 30px; }
   .filter-chip{
-    background: var(--accent2);
-    color:#fff;
-    border:none;
-    padding: 5px 12px;
-    border-radius: 16px;
-    font-size: 0.8rem;
-    cursor: pointer;
+    background: linear-gradient(135deg, var(--accent2), #4e92bd);
+    color:#fff; border:none; padding: 5px 13px; border-radius: 16px; font-size: 0.8rem; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
   .filter-label{ font-size:0.82rem; color:var(--sub); }
 
   .trip-list{ display:grid; gap:12px; margin-top: 8px; }
   .trip-card{
-    display:flex;
-    align-items:stretch;
-    background: var(--card);
+    display:flex; align-items:stretch;
+    background: var(--glass);
+    border: 1px solid var(--glass-brd);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow:hidden;
-    text-decoration:none;
-    color: inherit;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    overflow:hidden; text-decoration:none; color: inherit;
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.3);
+    transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
   }
+  .trip-card:hover{ transform: translateY(-2px); border-color: rgba(255,255,255,0.28); box-shadow: 0 14px 34px rgba(0,0,0,0.4); }
   .trip-card:active{ transform: scale(0.99); }
   .trip-cover{
-    flex: 0 0 84px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size: 2.4rem;
-    background: linear-gradient(135deg, #2e6f95, #1a4a63);
+    flex: 0 0 86px; display:flex; align-items:center; justify-content:center; font-size: 2.4rem;
+    background: radial-gradient(120% 120% at 30% 20%, #27416f 0%, #0e1830 70%);
+    border-right: 1px solid rgba(255,255,255,0.08);
   }
-  .trip-body{ flex:1; padding: 12px 14px; display:flex; flex-direction:column; justify-content:center; gap:3px; }
-  .trip-title{ font-size: 1.02rem; font-weight: 700; }
+  .trip-body{ flex:1; padding: 12px 15px; display:flex; flex-direction:column; justify-content:center; gap:4px; }
+  .trip-title{ font-size: 1.04rem; font-weight: 700; color:#fff; }
   .trip-meta{ font-size: 0.8rem; color: var(--sub); }
-  .trip-tags{ display:flex; gap:6px; margin-top:4px; }
+  .trip-tags{ display:flex; gap:6px; margin-top:5px; }
   .tag{
-    font-size: 0.68rem;
-    padding: 2px 8px;
-    border-radius: 8px;
-    background: #eef4f7;
-    color: var(--accent2);
+    font-size: 0.68rem; padding: 2px 9px; border-radius: 9px;
+    background: rgba(111,182,224,0.16); color: #a9d4ef; border:1px solid rgba(111,182,224,0.22);
   }
-  .tag.cont{ background:#fdeef0; color:var(--accent); }
-  .trip-chev{ align-self:center; padding-right: 14px; color: var(--sub); font-size:1.2rem; }
+  .tag.cont{ background: rgba(224,96,122,0.16); color:#f3a7b6; border-color: rgba(224,96,122,0.25); }
+  .trip-chev{ align-self:center; padding-right: 15px; color: var(--sub); font-size:1.3rem; }
 
   .empty{
-    text-align:center;
-    color: var(--sub);
-    font-size: 0.9rem;
-    padding: 36px 20px;
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    text-align:center; color: var(--sub); font-size: 0.9rem; padding: 40px 20px;
+    background: var(--glass); border:1px solid var(--glass-brd); border-radius: var(--radius);
   }
-  footer{ text-align:center; color: var(--sub); font-size: 0.75rem; margin-top: 26px; padding: 0 20px; }
+  footer{ text-align:center; color: var(--sub); font-size: 0.75rem; margin-top: 26px; padding: 0 20px; opacity:0.7; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🌏 My Travel Map</h1>
+  <h1><span class="g-emoji">🌏</span><span class="g-text">My Travel Map</span></h1>
 </header>
 
 <div class="wrap">
@@ -168,8 +160,13 @@
 
   <!-- MAP VIEW -->
   <div id="view-map" class="view active">
-    <div class="map-card">
+    <div class="map-card" id="map-card">
+      <div class="stars">
+        <div class="star-layer" id="stars-static"></div>
+        <div class="star-layer" id="stars-twinkle"></div>
+      </div>
       <div id="globeViz"></div>
+      <div id="country-labels"></div>
     </div>
   </div>
 
@@ -242,6 +239,16 @@ const trips = [
     start: "2025-12-25",
     end: "2025-12-29",
     url: "malaysia-singapore-202510.html"
+  },
+  {
+    title: "北越河內五日遊",
+    country: "越南",
+    flag: "🇻🇳",
+    continent: "asia",
+    iso: ["VNM"],
+    start: "2026-12-26",
+    end: "2026-12-30",
+    url: "vietnam-hanoi-202612.html"
   }
   /* 範例：
   { title:"首爾自由行", country:"韓國", flag:"🇰🇷", continent:"asia", iso:["KOR"],
@@ -261,7 +268,7 @@ function fmtRange(start, end){
 function tripCount(key){ return trips.filter(t => t.continent === key).length; }
 
 /* ===== 3D 地球儀（globe.gl / WebGL；函式庫已內建於 repo，離線可用） ===== */
-const A3_ZH = { JPN:"日本", KOR:"韓國", DEU:"德國", CHE:"瑞士", USA:"美國", MYS:"馬來西亞", SGP:"新加坡" };
+const A3_ZH = { JPN:"日本", KOR:"韓國", DEU:"德國", CHE:"瑞士", USA:"美國", MYS:"馬來西亞", SGP:"新加坡", VNM:"越南" };
 const visitedIso = new Set();
 trips.forEach(t => (t.iso || []).forEach(code => visitedIso.add(code)));
 
@@ -293,15 +300,162 @@ function initGlobe(){
           setView("list");
         }
       });
-    try { globe.globeMaterial().color.set("#cfe3ef"); } catch(e){}
+    try { globe.globeMaterial().color.set("#bfe0f0"); } catch(e){}
+
+    /* 國家英文名稱：放大接近時，在畫面上的國家顯示（HTML pill，清楚不受光影影響） */
+    const countryLabels = geo.features.map(f => {
+      const c = centroidOf(f);
+      return c ? { lat: c.lat, lng: c.lng, name: f.properties.name } : null;
+    }).filter(Boolean);
+    setupCountryLabels(countryLabels);
+
+    /* 3D 月亮：錨定在地球座標系（用 getScreenCoords 自行定位；轉動地球→月亮跟著動，轉到背面會被地球擋住淡出） */
+    const moon = document.createElement("div");
+    moon.className = "moon3d";
+    moon.innerHTML = '<span class="crater c1"></span><span class="crater c2"></span>';
+    document.getElementById("country-labels").appendChild(moon);
+    const vizEl = document.getElementById("globeViz");
+    let mLng = 150;
+    (function orbitMoon(){
+      mLng = (mLng + 0.16) % 360;                       // 公轉速度
+      const mLat = 16 * Math.sin(mLng * Math.PI / 180); // 軌道傾角
+      try{
+        const w = vizEl.clientWidth, h = vizEl.clientHeight;
+        // 量測地球在畫面上的半徑 → 動態決定月亮軌道距離（永遠在地球外、又在框內，不貼邊）
+        const pov = globe.pointOfView();
+        const cc = globe.getScreenCoords(pov.lat, pov.lng, 0);
+        const lb = globe.getScreenCoords(pov.lat, pov.lng + 90, 0);
+        const Rg = Math.hypot(lb.x - cc.x, lb.y - cc.y) || 120;
+        const half = Math.min(w, h) / 2;
+        const targetOff = Math.min(Rg * 1.42, half - 22);
+        const alt = Math.max(0.1, Math.min(0.42, targetOff / Rg - 1));   // 相對距離隨畫面調整
+        const P = globe.getCoords(mLat, mLng, alt);
+        const cam = globe.camera().position;
+        const dot = (P.x*cam.x + P.y*cam.y + P.z*cam.z) /
+                    (Math.hypot(P.x,P.y,P.z) * Math.hypot(cam.x,cam.y,cam.z));
+        const s = globe.getScreenCoords(mLat, mLng, alt);
+        const inside = s.x > 14 && s.x < w - 14 && s.y > 14 && s.y < h - 14;
+        if(dot > -0.3 && inside){                       // 正面且在框內才顯示（框外直接隱藏，不貼邊）
+          moon.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%,-50%)`;
+          moon.style.opacity = Math.max(0, Math.min(1, (dot + 0.3) / 0.22)).toFixed(2);
+          moon.style.display = "block";
+        } else {
+          moon.style.display = "none";
+        }
+      }catch(e){}
+      requestAnimationFrame(orbitMoon);
+    })();
+
     sizeGlobe();
     const c = globe.controls();
-    c.autoRotate = true; c.autoRotateSpeed = 0.55;
+    c.autoRotate = true; c.autoRotateSpeed = 0.5;
     c.enablePan = false; c.minDistance = 150; c.maxDistance = 500;
-    globe.pointOfView({ lat: 25, lng: 110, altitude: 2.2 }, 0);
+    globe.pointOfView({ lat: 25, lng: 110, altitude: viewAltitude() }, 0);  // 手機縮小地球留出月亮軌道空間
+    updateSun();                 // real-time day/night terminator
+    setInterval(updateSun, 60000);
   });
 }
-window.addEventListener("resize", sizeGlobe);
+
+/* 國家代表點（取頂點最多的環的平均座標當質心） */
+function centroidOf(f){
+  const g = f.geometry; if(!g) return null;
+  const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  let best = null, bestLen = 0;
+  polys.forEach(poly => { const ring = poly[0]; if(ring && ring.length > bestLen){ bestLen = ring.length; best = ring; } });
+  if(!best) return null;
+  let sx = 0, sy = 0; best.forEach(([lng,lat]) => { sx += lng; sy += lat; });
+  return { lng: sx/best.length, lat: sy/best.length };
+}
+
+/* 國家名稱標籤：只在放大接近、且在畫面內、位於朝向鏡頭那半面的國家才顯示 */
+function setupCountryLabels(labels){
+  const host = document.getElementById("country-labels");
+  const viz = document.getElementById("globeViz");
+  if(!host || !viz) return;
+  const pool = labels.map(() => { const d = document.createElement("div"); d.className = "clabel3d"; d.style.display = "none"; host.appendChild(d); return d; });
+  const R2 = 100 * 100;              // globe radius² (globe.gl radius = 100)
+  let active = false;
+  globe.onZoom(pov => {
+    active = pov.altitude < 0.85;    // 放大到夠近才顯示
+    if(!active) pool.forEach(d => d.style.display = "none");
+  });
+  function frame(){
+    if(active){
+      const cam = globe.camera().position;
+      const w = viz.clientWidth, h = viz.clientHeight;
+      for(let i=0;i<labels.length;i++){
+        const L = labels[i], d = pool[i];
+        const P = globe.getCoords(L.lat, L.lng, 0.01);
+        const nearSide = (P.x*cam.x + P.y*cam.y + P.z*cam.z) > R2;   // 朝向鏡頭的半球
+        if(nearSide){
+          const s = globe.getScreenCoords(L.lat, L.lng, 0.01);
+          if(s.x >= 0 && s.x <= w && s.y >= 0 && s.y <= h){
+            if(d.textContent !== L.name) d.textContent = L.name;
+            d.style.transform = `translate(${s.x}px, ${s.y}px) translate(-50%,-50%)`;
+            d.style.display = "block";
+            continue;
+          }
+        }
+        if(d.style.display !== "none") d.style.display = "none";
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+/* 手機較窄 → 地球縮小，讓月亮有空間繞行、不會貼邊 */
+function viewAltitude(){
+  const el = document.getElementById("globeViz");
+  const w = (el && el.clientWidth) || window.innerWidth;
+  return w < 560 ? 3.4 : 2.8;
+}
+function onResize(){
+  sizeGlobe();
+  if(globe){ const p = globe.pointOfView(); globe.pointOfView({ lat: p.lat, lng: p.lng, altitude: viewAltitude() }, 0); }
+}
+window.addEventListener("resize", onResize);
+
+/* ===== 真實日夜晨昏線：把太陽光打在現在的「太陽直射點」上 ===== */
+function updateSun(){
+  if(!globe) return;
+  try{
+    const now = new Date();
+    const dayOfYear = (now - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000;
+    const decl = -23.44 * Math.cos((2 * Math.PI / 365) * (dayOfYear + 10));   // solar declination
+    const utcH = now.getUTCHours() + now.getUTCMinutes() / 60;
+    const subLng = -(utcH - 12) * 15;                                          // sub-solar longitude
+    const p = globe.getCoords(decl, subLng, 2);
+    const lights = globe.lights();
+    const dir = lights.find(l => l.type === "DirectionalLight");
+    const amb = lights.find(l => l.type === "AmbientLight");
+    if(dir){ dir.position.set(p.x, p.y, p.z); dir.intensity = 2.6; }
+    if(amb){ amb.intensity = 0.28; }                                           // low fill → clear night side
+    globe.lights(lights);
+  }catch(e){}
+}
+
+/* ===== 星空（CSS box-shadow 星點，離線、零下載） ===== */
+function makeStars(el, count, maxX, maxY, sizeMax){
+  const parts = [];
+  for(let i=0;i<count;i++){
+    const x = Math.floor(Math.random()*maxX);
+    const y = Math.floor(Math.random()*maxY);
+    const s = (Math.random()*sizeMax).toFixed(1);
+    const a = (0.4 + Math.random()*0.6).toFixed(2);
+    parts.push(`${x}px ${y}px 0 ${s}px rgba(255,255,255,${a})`);
+  }
+  el.style.boxShadow = parts.join(",");
+}
+function buildStarfield(){
+  const card = document.getElementById("map-card");
+  if(!card) return;
+  const w = Math.max(card.clientWidth, 360), h = Math.max(card.clientHeight, 360);
+  makeStars(document.getElementById("stars-static"),  Math.round(w*h/3200), w, h, 0.7);
+  makeStars(document.getElementById("stars-twinkle"), Math.round(w*h/9000), w, h, 1.2);
+}
+
+buildStarfield();
+window.addEventListener("resize", buildStarfield);
 
 /* ===== 清單 ===== */
 let currentFilter = null;
